@@ -94,7 +94,7 @@ set_target_properties(pythonx PROPERTIES
 )
 
 if(UNIX AND NOT APPLE)
-    set_target_properties(pythonx PROPERTIES INSTALL_RPATH "\$ORIGIN/python3")
+    set_target_properties(pythonx PROPERTIES INSTALL_RPATH "\$ORIGIN/python3/lib")
 elseif(UNIX AND APPLE)
     # Although the compiler complains about not using these,
     # things only work with them set
