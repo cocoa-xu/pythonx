@@ -40,6 +40,30 @@ iex> python3! ["path/to/script.py", "arg1", "arg2"]
 ```elixir
 iex> import Pythonx
 iex> pip! ["install", "-U", "numpy"]
+iex> pip! ["install", "-U", "yt-dlp"]
+```
+
+#### Use an external python library
+
+```elixir
+iex> import Pythonx
+iex> video_id = "dQw4w9WgXcQ"
+iex> pyeval(
+...>   """
+...>   from yt_dlp import YoutubeDL
+...>   import json
+...>   with YoutubeDL(params={'quite': True}) as ytb_dl:
+...>   info = ytb_dl.extract_info('https://www.youtube.com/watch?v=#{video_id}', download=False)
+...>   info = json.dumps(info, indent=2)
+...>   """,
+...>   return: [:info]
+...> )
+[youtube] Extracting URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+[youtube] dQw4w9WgXcQ: Downloading webpage
+[youtube] dQw4w9WgXcQ: Downloading ios player API JSON
+[youtube] dQw4w9WgXcQ: Downloading player a95aa57a
+[youtube] dQw4w9WgXcQ: Downloading m3u8 information
+iex> IO.puts(info)
 ```
 
 ## Installation
