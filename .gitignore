@@ -29,3 +29,5 @@ pybeam-*.tar
 /.cache/
 /.vscode/
 /build/
+
+checksum.exs

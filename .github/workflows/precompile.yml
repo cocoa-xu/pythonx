@@ -1,0 +1,125 @@
+name: precompile
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  linux:
+    runs-on: ubuntu-20.04
+    env:
+      MIX_ENV: prod
+    strategy:
+      matrix:
+        otp_version: [24]
+
+    name: Linux - OTP ${{ matrix.otp_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp_version }}
+          elixir-version: 1.13
+
+      - name: Install system dependecies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential automake autoconf pkg-config bc m4 unzip zip \
+            gcc g++ \
+            gcc-i686-linux-gnu g++-i686-linux-gnu \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+            gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+            gcc-riscv64-linux-gnu g++-riscv64-linux-gnu \
+            gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu \
+            gcc-s390x-linux-gnu g++-s390x-linux-gnu
+
+      - name: Precompile
+        run: |
+          export ELIXIR_MAKE_CACHE_DIR=$(pwd)/cache
+          mkdir -p "${ELIXIR_MAKE_CACHE_DIR}"
+          mix deps.get
+          mix elixir_make.precompile
+
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            cache/*.tar.gz
+            cache/*.sha256
+
+  macos:
+    runs-on: macos-12
+    env:
+      MIX_ENV: prod
+      ELIXIR_VERSION: "1.16.0"
+    strategy:
+      matrix:
+        otp_version: ["24.3.4.16"]
+
+    name: macOS - OTP ${{ matrix.otp_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache OTP
+        uses: actions/cache@v4
+        id: cache-otp
+        with:
+          path: ./cache/otp
+          key: ${{ runner.os }}-otp-${{ matrix.otp_version }}
+
+      - name: Download OTP
+        if: steps.cache-otp.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ./cache/otp
+          curl -fSL https://github.com/cocoa-xu/otp-build/releases/download/v${{ matrix.otp_version }}/otp-x86_64-apple-darwin.tar.gz -o ./cache/otp/otp-v${{ matrix.otp_version }}-x86_64-apple-darwin.tar.gz
+          cd ./cache/otp
+          tar -xzf otp-v${{ matrix.otp_version }}-x86_64-apple-darwin.tar.gz
+
+      - name: Cache Elixir
+        id: cache-elixir
+        uses: actions/cache@v4
+        with:
+          path: ./cache/elixir
+          key: ${{ runner.os }}-elixir-${{ env.ELIXIR_VERSION }}-${{ matrix.otp_version }}
+
+      - name: Download and Compile Elixir
+        if: steps.cache-elixir.outputs.cache-hit != 'true'
+        run: |
+          export PATH=$(pwd)/./cache/otp/usr/local/bin:$(pwd)/./cache/elixir/elixir-${{ env.ELIXIR_VERSION }}/bin:${PATH}
+          export ERL_ROOTDIR=$(pwd)/./cache/otp/usr/local/lib/erlang
+          mkdir -p ./cache/elixir
+          curl -fSL https://github.com/elixir-lang/elixir/archive/refs/tags/v${{ env.ELIXIR_VERSION }}.tar.gz -o ./cache/elixir/elixir-${{ env.ELIXIR_VERSION }}.tar.gz
+          cd ./cache/elixir
+          tar -xzf elixir-${{ env.ELIXIR_VERSION }}.tar.gz
+          cd elixir-${{ env.ELIXIR_VERSION }}
+          make -j$(sysctl -n hw.ncpu) install
+
+      - name: Install Mix and Rebar
+        run: |
+          export PATH=$(pwd)/./cache/otp/usr/local/bin:$(pwd)/./cache/elixir/elixir-${{ env.ELIXIR_VERSION }}/bin:${PATH}
+          export ERL_ROOTDIR=$(pwd)/./cache/otp/usr/local/lib/erlang
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Precompile
+        run: |
+          export PATH=$(pwd)/./cache/otp/usr/local/bin:$(pwd)/./cache/elixir/elixir-${{ env.ELIXIR_VERSION }}/bin:${PATH}
+          export ERL_ROOTDIR=$(pwd)/./cache/otp/usr/local/lib/erlang
+
+          export ELIXIR_MAKE_CACHE_DIR=$(pwd)/cache
+          mkdir -p "${ELIXIR_MAKE_CACHE_DIR}"
+          mix deps.get
+          mix elixir_make.precompile
+
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            cache/*.tar.gz
+            cache/*.sha256

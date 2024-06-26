@@ -12,10 +12,15 @@ PYTHON3_SOURCE_TARBALL = $(CACHE_DIR)/Python-$(PYTHON3_VERSION).tgz
 PYTHON3_SOURCE_URL = https://www.python.org/ftp/python/$(PYTHON3_VERSION)/Python-$(PYTHON3_VERSION).tgz
 PYTHON3_SOURCE_DIR = $(CACHE_DIR)/Python-$(PYTHON3_VERSION)
 PYTHON3_LIBRARY_DIR = $(PRIV_DIR)/python3/lib
+PYTHONX_PREFER_PRECOMPILED_LIBPYTHON3 ?= true
+PYTHONX_LIBPYTHON3_TRIPLET ?= native
 CMAKE_PYTHONX_BUILD_DIR = $(MIX_APP_PATH)/cmake_pythonx
 
 ifdef CMAKE_TOOLCHAIN_FILE
 	CMAKE_CONFIGURE_FLAGS=-D CMAKE_TOOLCHAIN_FILE="$(CMAKE_TOOLCHAIN_FILE)"
+endif
+ifdef CC_PRECOMPILER_CURRENT_TARGET
+	PYTHONX_LIBPYTHON3_TRIPLET=$(CC_PRECOMPILER_CURRENT_TARGET)
 endif
 
 CMAKE_BUILD_TYPE ?= Release
@@ -51,10 +56,14 @@ $(PYTHON3_SOURCE_DIR): $(PYTHON3_SOURCE_TARBALL)
 
 $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 	@ if [ ! -d "$(PYTHON3_LIBRARY_DIR)" ]; then \
-		cd $(PYTHON3_SOURCE_DIR) && \
-		CPP=cpp ./configure --prefix=/ --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
-		make $(MAKE_BUILD_FLAGS) && \
-		make DESTDIR="$(PRIV_DIR)/python3" install ; \
+		if [ "$(PYTHONX_PREFER_PRECOMPILED_LIBPYTHON3)" = "true" ]; then \
+			sh scripts/download_precompiled_libpython3.sh "$(PYTHON3_VERSION)" "$(CACHE_DIR)" "$(PRIV_DIR)" "$(PYTHONX_LIBPYTHON3_TRIPLET)" ; \
+		else \
+			cd $(PYTHON3_SOURCE_DIR) && \
+			CPP=cpp ./configure --prefix=/ --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
+			make $(MAKE_BUILD_FLAGS) && \
+			make DESTDIR="$(PRIV_DIR)/python3" install ; \
+		fi ; \
 	fi
 
 $(NIF_SO): $(PYTHON3_LIBRARY_DIR)

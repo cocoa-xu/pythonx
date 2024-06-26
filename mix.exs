@@ -56,7 +56,7 @@ defmodule Pythonx.MixProject do
   defp package do
     [
       name: "pythonx",
-      files: ~w(c_src lib mix.exs README* LICENSE* Makefile CMakeLists.txt checksum.exs),
+      files: ~w(c_src lib mix.exs README* LICENSE* Makefile CMakeLists.txt checksum.exs, scripts),
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @github_url}
     ]
