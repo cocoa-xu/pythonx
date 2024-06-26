@@ -24,7 +24,7 @@ defmodule Pythonx.MixProject do
       ],
 
       # Compilers
-      compilers: [:elixir_make] ++ Mix.compilers(),
+      compilers: [:elixir_make] ++ Mix.compilers()
     ]
   end
 

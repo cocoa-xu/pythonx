@@ -1,4 +1,4 @@
-defmodule PybeamTest do
+defmodule Pythonx.Test do
   use ExUnit.Case
   doctest Pythonx
   import Pythonx
@@ -14,6 +14,7 @@ defmodule PybeamTest do
       """,
       return: [:x, :y, :z]
     )
+
     assert {25, 6, {5, 6}} == {x, y, z}
   end
 end
