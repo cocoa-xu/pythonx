@@ -2,10 +2,10 @@
 #include <Python.h>
 #include <erl_nif.h>
 #include "nif_utils.hpp"
+#include <algorithm>
 #include <optional>
 #include <string>
 #include <vector>
-#include <unordered_set>
 
 static ErlNifMutex * python_mutex = nullptr;
 static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * dict);
