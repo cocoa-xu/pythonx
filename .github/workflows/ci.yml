@@ -10,12 +10,17 @@ on:
       - '**/README.md'
       - 'LICENSE*'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   linux:
     runs-on: ubuntu-20.04
     env:
       MIX_ENV: test
     strategy:
+      fail-fast: false
       matrix:
         job:
           - { otp_version: "26", elixir_version: "1.15" }
@@ -43,6 +48,7 @@ jobs:
       MIX_ENV: test
       ELIXIR_VERSION: "1.16.2"
     strategy:
+      fail-fast: false
       matrix:
         otp_version: ["25.3.2.8", "26.2.2"]
 
