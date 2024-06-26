@@ -266,6 +266,15 @@ static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
         PyConfig_SetBytesString(&config, &config.base_exec_prefix, python_home.c_str());
         PyConfig_SetBytesString(&config, &config.prefix, python_home.c_str());
         PyConfig_SetBytesString(&config, &config.exec_prefix, python_home.c_str());
+
+#ifndef __APPLE__
+        std::string so_file = python_home + "/lib/libpython3.12.so";
+        void *handle = dlopen(so_file.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+        if (!handle) {
+            fprintf(stderr, "Error loading libpython: %s\n", dlerror());
+            return;
+        }
+#endif
     }
     return 0;
 }
