@@ -52,7 +52,7 @@ $(PYTHON3_SOURCE_DIR): $(PYTHON3_SOURCE_TARBALL)
 $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 	@ if [ ! -d "$(PYTHON3_LIBRARY_DIR)" ]; then \
 		cd $(PYTHON3_SOURCE_DIR) && \
-		./configure --prefix=/ --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
+		CPP=cpp ./configure --prefix=/ --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
 		make $(MAKE_BUILD_FLAGS) && \
 		make DESTDIR="$(PRIV_DIR)/python3" install ; \
 	fi
