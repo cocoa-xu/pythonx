@@ -1,6 +1,11 @@
 # Pythonx
 
+[![Hex.pm](https://img.shields.io/hexpm/v/pythonx.svg?style=flat&color=blue)](https://hex.pm/packages/pythonx)
+
 Python Interpreter in Elixir
+
+> [!IMPORTANT]
+> Pythonx is still very much a work in progress and is mainly intended for some proof of concept at current stage. 
 
 ## Proof of Concept
 
