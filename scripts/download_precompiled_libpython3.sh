@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 LIBPYTHON3_VERSION=$1
 LIBPYTHON3_CACHE_DIR=$2
