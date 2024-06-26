@@ -35,7 +35,7 @@ by adding `pybeam` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:pybeam, "~> 0.1.0"}
+    {:pythonx, "~> 0.1.0"}
   ]
 end
 ```
