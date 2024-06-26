@@ -4,7 +4,7 @@ Python Interpreter in Elixir
 
 ## Proof of Concept
 
-### Python Code Evaluation
+#### Python Code Evaluation
 ```elixir
 defmodule MyModule do
   import Pythonx
@@ -25,6 +25,21 @@ defmodule MyModule do
     # {25, 6, {5, 6}} == {x, y, z}
   end
 end
+```
+
+#### Executes a command with the embedded python3 executable
+
+```elixir
+iex> import Pythonx
+iex> python3! "path/to/script.py"
+iex> python3! ["path/to/script.py", "arg1", "arg2"]
+```
+
+#### Executes a command with the embedded pip module
+
+```elixir
+iex> import Pythonx
+iex> pip! ["install", "-U", "numpy"]
 ```
 
 ## Installation
