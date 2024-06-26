@@ -272,7 +272,7 @@ static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
         void *handle = dlopen(so_file.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!handle) {
             fprintf(stderr, "Error loading libpython: %s\n", dlerror());
-            return;
+            return 1;
         }
 #endif
     }
