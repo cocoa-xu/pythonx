@@ -25,9 +25,6 @@ defmodule Pythonx.MixProject do
 
       # Compilers
       compilers: [:elixir_make] ++ Mix.compilers(),
-      make_precompiler: {:nif, CCPrecompiler},
-      make_precompiler_url: "#{@github_url}/releases/download/v#{@version}/@{artefact_filename}",
-      make_precompiler_nif_versions: [versions: ["2.16"]]
     ]
   end
 
@@ -40,7 +37,6 @@ defmodule Pythonx.MixProject do
   defp deps do
     [
       {:elixir_make, "~> 0.8"},
-      {:cc_precompiler, "~> 0.1"},
       {:ex_doc, "~> 0.34", only: :docs, runtime: false}
     ]
   end
