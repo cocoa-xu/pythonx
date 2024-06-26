@@ -187,6 +187,25 @@ static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
     ERL_NIF_TERM ret{};
 
     enif_mutex_lock(python_mutex);
+
+    PyStatus status;
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    config.isolated = 1;
+
+    Dl_info info{};
+    if (dladdr((const void *)&pythonx_eval, &info)) {
+        std::string path = info.dli_fname;
+        std::string dir = path.substr(0, path.find_last_of("/"));
+        std::wstring python_home = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(dir + "/python3");
+        PyConfig_SetString(&config, &config.home, python_home.c_str());
+    }
+
+    status = Py_InitializeFromConfig(&config);
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+    PyConfig_Clear(&config);
     
     PyObject * local_dict = PyDict_New();
     PyObject * main_module = PyImport_AddModule("__main__");
@@ -233,34 +252,18 @@ static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
     Py_DECREF(local_dict);
     Py_DECREF(global_dict);
 
+    Py_Finalize();
+
     enif_mutex_unlock(python_mutex);
     return ret;
 }
 
 static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
-    python_mutex = enif_mutex_create("python_mutex");
+    char mutex_name[] = {"python_mutex"};
+    python_mutex = enif_mutex_create(mutex_name);
     if (python_mutex == nullptr) {
         return -1;
     }
-
-    PyStatus status;
-    PyConfig config;
-    PyConfig_InitPythonConfig(&config);
-    config.isolated = 1;
-
-    Dl_info info{};
-    if (dladdr((const void *)&on_load, &info)) {
-        std::string path = info.dli_fname;
-        std::string dir = path.substr(0, path.find_last_of("/"));
-        std::wstring python_home = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(dir + "/python3");
-        PyConfig_SetString(&config, &config.home, python_home.c_str());
-    }
-
-    status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
-        Py_ExitStatusException(status);
-    }
-    PyConfig_Clear(&config);
     return 0;
 }
 

@@ -70,7 +70,6 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 			$(CMAKE_CONFIGURE_FLAGS) && \
 		cmake --build "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" -j$(DEFAULT_JOBS) && \
 		cmake --install "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" && \
-		echo "CHANGE_INSTALL_NAME: $(CHANGE_INSTALL_NAME)" && \
 		if [ "$(CHANGE_INSTALL_NAME)" = "1" ]; then \
 			install_name_tool -change /lib/libpython3.12.dylib @loader_path/python3/lib/libpython3.12.dylib "$(NIF_SO)" ; \
 		fi ; \
