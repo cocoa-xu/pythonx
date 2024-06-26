@@ -1,6 +1,31 @@
-# Pybeam
+# Pythonx
 
-**TODO: Add description**
+Python Interpreter in Elixir
+
+## Proof of Concept
+
+### Python Code Evaluation
+```elixir
+defmodule MyModule do
+  import Pythonx
+
+  def do_stuff_in_python do
+    pyeval(
+      """
+      import math
+      x = 5
+      y = 6
+      z = (x, y)
+      x = math.pow(x, 2)
+      """,
+      return: [:x, :y, :z] # <- list of variables to return to Elixir
+    )
+    
+    # these variables will be automatically defined in the current scope
+    # {25, 6, {5, 6}} == {x, y, z}
+  end
+end
+```
 
 ## Installation
 

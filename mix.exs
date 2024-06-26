@@ -1,28 +1,64 @@
-defmodule Pybeam.MixProject do
+defmodule Pythonx.MixProject do
   use Mix.Project
+
+  @app :pythonx
+  @version "0.1.0"
+  @github_url "https://github.com/cocoa-xu/pythonx"
 
   def project do
     [
-      app: :pybeam,
-      version: "0.1.0",
-      elixir: "~> 1.18-dev",
+      app: @app,
+      version: @version,
+      elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      docs: docs(),
+
+      # Package information
+      name: "Pythonx",
+      description: "Python Interpreter in Elixir",
+      package: package(),
+      preferred_cli_env: [
+        docs: :docs,
+        "hex.publish": :docs
+      ],
+
+      # Compilers
+      compilers: [:elixir_make] ++ Mix.compilers(),
+      make_precompiler: {:nif, CCPrecompiler},
+      make_precompiler_url: "#{@github_url}/releases/download/v#{@version}/@{artefact_filename}",
+      make_precompiler_nif_versions: [versions: ["2.16"]]
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:elixir_make, "~> 0.8"},
+      {:cc_precompiler, "~> 0.1"},
+      {:ex_doc, "~> 0.34", only: :docs, runtime: false}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "Pythonx",
+      source_ref: "v#{@version}",
+      source_url: @github_url
+    ]
+  end
+
+  defp package do
+    [
+      name: "pythonx",
+      files: ~w(c_src lib mix.exs README* LICENSE* Makefile CMakeLists.txt checksum.exs),
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => @github_url}
     ]
   end
 end
