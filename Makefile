@@ -58,7 +58,9 @@ $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 	@ if [ ! -d "$(PYTHON3_LIBRARY_DIR)" ]; then \
 		if [ "$(PYTHONX_PREFER_PRECOMPILED_LIBPYTHON3)" = "true" ]; then \
 			bash ./scripts/download_precompiled_libpython3.sh "$(PYTHON3_VERSION)" "$(CACHE_DIR)" "$(PRIV_DIR)" "$(PYTHONX_LIBPYTHON3_TRIPLET)" ; \
-		else \
+			STATUS=$$? ; \
+		fi ; \
+		if [ "$$STATUS" != "0" ]; then \
 			cd $(PYTHON3_SOURCE_DIR) && \
 			CPP=cpp ./configure --prefix=/ --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
 			make $(MAKE_BUILD_FLAGS) && \
