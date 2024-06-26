@@ -22,6 +22,14 @@ CMAKE_BUILD_TYPE ?= Release
 DEFAULT_JOBS ?= $(shell erl -noshell -eval "io:format('~p~n',[erlang:system_info(logical_processors_online)]), halt().")
 MAKE_BUILD_FLAGS ?= -j$(DEFAULT_JOBS)
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+CHANGE_INSTALL_NAME = 1
+endif
+ifeq ($(TARGET_OS),linux)
+CHANGE_INSTALL_NAME = 0
+endif
+
 build: $(NIF_SO)
 	@ echo > /dev/null
 
@@ -44,9 +52,9 @@ $(PYTHON3_SOURCE_DIR): $(PYTHON3_SOURCE_TARBALL)
 $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 	@ if [ ! -d "$(PYTHON3_LIBRARY_DIR)" ]; then \
 		cd $(PYTHON3_SOURCE_DIR) && \
-		./configure --prefix=/priv/python3 --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
+		./configure --prefix=/ --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
 		make $(MAKE_BUILD_FLAGS) && \
-		make DESTDIR="$(MIX_APP_PATH)" install ; \
+		make DESTDIR="$(PRIV_DIR)/python3" install ; \
 	fi
 
 $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
@@ -56,9 +64,16 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 		 	-D CMAKE_BUILD_TYPE="$(CMAKE_BUILD_TYPE)" \
 			-D Python3_ROOT_DIR="$(PRIV_DIR)/python3" \
 			-D C_SRC="$(C_SRC)" \
+			-D ERTS_INCLUDE_DIR="$(ERTS_INCLUDE_DIR)" \
+			-D MIX_APP_PATH="$(MIX_APP_PATH)" \
+			-D CMAKE_INSTALL_PREFIX="$(PRIV_DIR)" \
 			$(CMAKE_CONFIGURE_FLAGS) && \
 		cmake --build "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" -j$(DEFAULT_JOBS) && \
-		cp "$(CMAKE_PYTHONX_BUILD_DIR)/pythonx.so" "$(NIF_SO)" ; \
+		cmake --install "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" && \
+		echo "CHANGE_INSTALL_NAME: $(CHANGE_INSTALL_NAME)" && \
+		if [ "$(CHANGE_INSTALL_NAME)" = "1" ]; then \
+			install_name_tool -change /lib/libpython3.12.dylib @loader_path/python3/lib/libpython3.12.dylib "$(NIF_SO)" ; \
+		fi ; \
 	fi
 
 clean:

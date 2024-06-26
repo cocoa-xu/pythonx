@@ -57,6 +57,7 @@ message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
 
+message(STATUS "Python3_ROOT_DIR: ${Python3_ROOT_DIR}")
 find_package(Python3 REQUIRED COMPONENTS Development)
 message(STATUS "Python3_INCLUDE_DIRS: ${Python3_INCLUDE_DIRS}")
 message(STATUS "Python3_LIBRARIES: ${Python3_LIBRARIES}")
@@ -74,12 +75,13 @@ add_library(pythonx SHARED
 )
 install(
     TARGETS pythonx
-    RUNTIME DESTINATION "${PRIV_DIR}"
+    DESTINATION "${PRIV_DIR}"
 )
 target_include_directories(pythonx PRIVATE "${Python3_INCLUDE_DIRS}" "${ERTS_INCLUDE_DIR}")
 target_link_options(pythonx PRIVATE "${Python3_LINK_OPTIONS}")
 target_link_directories(pythonx PRIVATE ${Python3_LIBRARY_DIRS})
 target_link_libraries(pythonx "${Python3_LIBRARIES}")
+target_compile_options(pythonx PRIVATE "-Wno-deprecated-declarations")
 set_property(TARGET pythonx PROPERTY CXX_STANDARD 17)
 set_property(TARGET pythonx PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_target_properties(pythonx PROPERTIES PREFIX "")
@@ -92,12 +94,12 @@ set_target_properties(pythonx PROPERTIES
 )
 
 if(UNIX AND NOT APPLE)
-    set_target_properties(pythonx PROPERTIES INSTALL_RPATH "\$ORIGIN/python3/lib:\$ORIGIN/python3/lib64")
+    set_target_properties(pythonx PROPERTIES INSTALL_RPATH "\$ORIGIN/python3")
 elseif(UNIX AND APPLE)
     # Although the compiler complains about not using these,
     # things only work with them set
     set(CMAKE_SHARED_LINKER_FLAGS "-flat_namespace -undefined dynamic_lookup")
-    set_target_properties(pythonx PROPERTIES INSTALL_RPATH "@loader_path/python3/lib")
+    set_target_properties(pythonx PROPERTIES INSTALL_RPATH "@loader_path/python3")
 endif()
 
 # if(WIN32)
