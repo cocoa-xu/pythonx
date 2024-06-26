@@ -81,7 +81,6 @@ target_include_directories(pythonx PRIVATE "${Python3_INCLUDE_DIRS}" "${ERTS_INC
 target_link_options(pythonx PRIVATE "${Python3_LINK_OPTIONS}")
 target_link_directories(pythonx PRIVATE ${Python3_LIBRARY_DIRS})
 target_link_libraries(pythonx "${Python3_LIBRARIES}")
-target_compile_options(pythonx PRIVATE "-Wno-deprecated-declarations")
 set_property(TARGET pythonx PROPERTY CXX_STANDARD 17)
 set_property(TARGET pythonx PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_target_properties(pythonx PROPERTIES PREFIX "")

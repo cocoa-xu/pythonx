@@ -6,11 +6,10 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include <locale>
-#include <codecvt>
 #include <dlfcn.h>
 
 static ErlNifMutex * python_mutex = nullptr;
+static PyConfig config;
 static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * dict);
 static std::optional<ERL_NIF_TERM> python_dict_to(ErlNifEnv *env, PyObject * dict);
 static std::optional<ERL_NIF_TERM> python_tuple_to(ErlNifEnv *env, PyObject * dict);
@@ -188,25 +187,11 @@ static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
 
     enif_mutex_lock(python_mutex);
 
-    PyStatus status;
-    PyConfig config;
-    PyConfig_InitPythonConfig(&config);
-    config.isolated = 1;
-
-    Dl_info info{};
-    if (dladdr((const void *)&pythonx_eval, &info)) {
-        std::string path = info.dli_fname;
-        std::string dir = path.substr(0, path.find_last_of("/"));
-        std::wstring python_home = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(dir + "/python3");
-        PyConfig_SetString(&config, &config.home, python_home.c_str());
-    }
-
-    status = Py_InitializeFromConfig(&config);
+    PyStatus status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
         Py_ExitStatusException(status);
     }
-    PyConfig_Clear(&config);
-    
+
     PyObject * local_dict = PyDict_New();
     PyObject * main_module = PyImport_AddModule("__main__");
     PyObject * global_dict = PyModule_GetDict(main_module);
@@ -263,6 +248,24 @@ static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
     python_mutex = enif_mutex_create(mutex_name);
     if (python_mutex == nullptr) {
         return -1;
+    }
+    
+    PyConfig_InitPythonConfig(&config);
+    config.isolated = 1;
+
+    Dl_info info{};
+    if (dladdr((const void *)&pythonx_eval, &info)) {
+        std::string path = info.dli_fname;
+        std::string dir = path.substr(0, path.find_last_of("/"));
+        std::string python_home = dir + "/python3";
+        PyConfig_SetBytesString(&config, &config.home, python_home.c_str());
+
+        std::string stdlib_dir = python_home + "/lib/python3.12";
+        PyConfig_SetBytesString(&config, &config.stdlib_dir, stdlib_dir.c_str());
+        PyConfig_SetBytesString(&config, &config.base_prefix, python_home.c_str());
+        PyConfig_SetBytesString(&config, &config.base_exec_prefix, python_home.c_str());
+        PyConfig_SetBytesString(&config, &config.prefix, python_home.c_str());
+        PyConfig_SetBytesString(&config, &config.exec_prefix, python_home.c_str());
     }
     return 0;
 }
