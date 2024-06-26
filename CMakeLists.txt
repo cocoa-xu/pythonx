@@ -27,6 +27,12 @@ else()
 endif()
 message(STATUS "Using ERTS_INCLUDE_DIR: ${ERTS_INCLUDE_DIR}")
 
+if(DEFINED C_SRC AND NOT "${C_SRC}" STREQUAL "")
+    set(C_SRC "${C_SRC}")
+else()
+    set(C_SRC "${CMAKE_CURRENT_LIST_DIR}/c_src")
+endif()
+
 if(UNIX AND APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "-flat_namespace -undefined suppress -undefined dynamic_lookup")
 endif()
