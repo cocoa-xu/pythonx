@@ -89,10 +89,7 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 clean:
 	@ rm -rf "$(PRIV_DIR)/python3"
 	@ rm -rf "$(NIF_SO)"
-	@ if [ -d "$(PYTHON3_SOURCE_DIR)" ]; then \
-		cd $(PYTHON3_SOURCE_DIR) && \
-		make clean ; \
-	fi
+	@ rm -rf "$(PYTHON3_SOURCE_DIR)"
 
 clean_pythonx:
 	@ rm -rf "$(NIF_SO)"
