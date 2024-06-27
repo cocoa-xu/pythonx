@@ -6,7 +6,9 @@ PRIV_DIR = $(MIX_APP_PATH)/priv
 NIF_SO = $(PRIV_DIR)/pythonx.so
 
 C_SRC = $(shell pwd)/c_src
-PYTHON3_VERSION = 3.12.4
+PYTHON3_VERSION_MAJOR_MINON = 3.12
+PYTHON3_VERSION_PATCH = 4
+PYTHON3_VERSION = $(PYTHON3_VERSION_MAJOR_MINON).$(PYTHON3_VERSION_PATCH)
 CACHE_DIR = $(shell pwd)/.cache
 PYTHON3_SOURCE_TARBALL = $(CACHE_DIR)/Python-$(PYTHON3_VERSION).tgz
 PYTHON3_SOURCE_URL = https://www.python.org/ftp/python/$(PYTHON3_VERSION)/Python-$(PYTHON3_VERSION).tgz
@@ -25,7 +27,9 @@ ifdef CC_PRECOMPILER_CURRENT_TARGET
 			CMAKE_CONFIGURE_FLAGS=-D CMAKE_OSX_ARCHITECTURES=x86_64
 		endif
 	else
-		CMAKE_CONFIGURE_FLAGS=-D CMAKE_TOOLCHAIN_FILE="$(shell pwd)/cc_toolchain/$(CC_PRECOMPILER_CURRENT_TARGET).cmake"
+		ifneq ($(findstring x86_64, $(CC_PRECOMPILER_CURRENT_TARGET)), x86_64)
+			CMAKE_CONFIGURE_FLAGS=-D CMAKE_TOOLCHAIN_FILE="$(shell pwd)/cc_toolchain/$(CC_PRECOMPILER_CURRENT_TARGET).cmake"
+		endif
 	endif
 endif
 ifdef CMAKE_TOOLCHAIN_FILE
@@ -91,7 +95,7 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 		cmake --build "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" -j$(DEFAULT_JOBS) && \
 		cmake --install "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" && \
 		if [ "$(CHANGE_INSTALL_NAME)" = "1" ]; then \
-			install_name_tool -change /lib/libpython3.12.dylib @loader_path/python3/lib/libpython3.12.dylib "$(NIF_SO)" ; \
+			install_name_tool -change /lib/libpython$(PYTHON3_VERSION_MAJOR_MINON).dylib @loader_path/python3/lib/libpython$(PYTHON3_VERSION_MAJOR_MINON).dylib "$(NIF_SO)" ; \
 		fi ; \
 	fi
 
