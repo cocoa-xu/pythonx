@@ -28,6 +28,39 @@ defmodule Pythonx.MixProject do
       make_precompiler: {:nif, CCPrecompiler},
       make_precompiler_url: "#{@github_url}/releases/download/v#{@version}/@{artefact_filename}",
       make_precompiler_nif_versions: [versions: ["2.16"]],
+      cc_precompiler: [
+        cleanup: "clean",
+        compilers: %{
+          {:unix, :linux} => %{
+            "x86_64-linux-gnu" => {
+              "x86_64-linux-gnu-gcc",
+              "x86_64-linux-gnu-g++"
+            },
+            "aarch64-linux-gnu" => {
+              "aarch64-linux-gnu-gcc",
+              "aarch64-linux-gnu-g++"
+            },
+            "powerpc64le-linux-gnu" => {
+              "powerpc64le-linux-gnu-gcc",
+              "powerpc64le-linux-gnu-g++"
+            },
+            "riscv64-linux-gnu" => {
+              "riscv64-linux-gnu-gcc",
+              "riscv64-linux-gnu-g++"
+            },
+            "s390x-linux-gnu" => {
+              "s390x-linux-gnu-gcc",
+              "s390x-linux-gnu-g++"
+            }
+          },
+          {:unix, :darwin} => %{
+            :include_default_ones => true
+          },
+          {:win32, :nt} => %{
+            :include_default_ones => true
+          }
+        }
+      ]
     ]
   end
 

@@ -86,7 +86,11 @@ get_triplet() {
       ;;
     esac
   else
-    echo "${PYTHONX_LIBPYTHON3_TRIPLET}"
+    if [ "${PYTHONX_LIBPYTHON3_TRIPLET}" = "powerpc64le-linux-gnu" ]; then
+      echo "ppc64le-linux-gnu"
+    else
+      echo "${PYTHONX_LIBPYTHON3_TRIPLET}"
+    fi
   fi
 }
 
