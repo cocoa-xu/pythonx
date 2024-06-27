@@ -96,14 +96,4 @@ defmodule Pythonx do
       {:error, reason} -> raise reason
     end
   end
-
-  def test do
-    eval!("""
-    x = 5
-    y = 6
-    z = (x, y)
-    import math
-    (1,2)
-    """)
-  end
 end
