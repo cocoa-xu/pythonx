@@ -16,6 +16,10 @@ defmodule Pythonx do
     end
   end
 
+  def finalize do
+    Pythonx.Nif.finalize()
+  end
+
   @doc """
   Executes a command with the embedded python3 executable.
   """

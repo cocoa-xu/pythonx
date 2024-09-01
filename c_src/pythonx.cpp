@@ -9,6 +9,10 @@
 #include <dlfcn.h>
 
 static ErlNifMutex * python_mutex = nullptr;
+static bool python_initialized = false;
+static PyObject * local_dict;
+static PyObject * global_dict;
+
 static PyConfig config;
 static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * dict);
 static std::optional<ERL_NIF_TERM> python_dict_to(ErlNifEnv *env, PyObject * dict);
@@ -187,14 +191,21 @@ static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
 
     enif_mutex_lock(python_mutex);
 
-    PyStatus status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
-        Py_ExitStatusException(status);
+    if (!python_initialized) {
+        PyStatus status = Py_InitializeFromConfig(&config);
+        if (PyStatus_Exception(status)) {
+            Py_ExitStatusException(status);
+        }
+
+        local_dict = PyDict_New();
+        global_dict = PyDict_New();
+
+        // Initialize globals with the __builtins__ module to enable built-in functions
+        PyDict_SetItemString(global_dict, "__builtins__", PyEval_GetBuiltins());
+        
+        python_initialized = true;
     }
 
-    PyObject * local_dict = PyDict_New();
-    PyObject * main_module = PyImport_AddModule("__main__");
-    PyObject * global_dict = PyModule_GetDict(main_module);
     PyObject *result = PyRun_String(python_code.c_str(), Py_file_input, global_dict, local_dict);
     if (result == NULL) {
         // Handle error (print traceback, etc.)
@@ -234,13 +245,24 @@ static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
         Py_DECREF(result);
     }
 
-    Py_DECREF(local_dict);
-    Py_DECREF(global_dict);
-
-    Py_Finalize();
-
     enif_mutex_unlock(python_mutex);
     return ret;
+}
+
+static ERL_NIF_TERM pythonx_finalize(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    enif_mutex_lock(python_mutex);
+
+    if (python_initialized) {
+        Py_DECREF(global_dict);
+        Py_DECREF(local_dict);
+        Py_DECREF(global_dict);
+        Py_DECREF(local_dict);
+        Py_Finalize();
+        python_initialized = false;
+    }
+
+    enif_mutex_unlock(python_mutex);
+    return erlang::nif::ok(env);
 }
 
 static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
@@ -289,6 +311,7 @@ static int on_upgrade(ErlNifEnv *_sth0, void **_sth1, void **_sth2, ERL_NIF_TERM
 
 static ErlNifFunc nif_functions[] = {
     {"eval", 4, pythonx_eval, 0},
+    {"finalize", 0, pythonx_finalize, 0},
 };
 
 ERL_NIF_INIT(Elixir.Pythonx.Nif, nif_functions, on_load, on_reload, on_upgrade, NULL);

@@ -1,5 +1,5 @@
 defmodule Pythonx.Test do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest Pythonx
   import Pythonx
 
@@ -14,7 +14,60 @@ defmodule Pythonx.Test do
       """,
       return: [:x, :y, :z]
     )
+    Pythonx.finalize()
 
     assert {25, 6, {5, 6}} == {x, y, z}
+
+    # end
+
+    # test "does not preserve previous variables after a finialize call" do
+    pyeval(
+      """
+      import math
+      x = 5
+      y = 6
+      """,
+      return: [:x, :y]
+    )
+
+    assert {5, 6} == {x, y}
+
+    pyeval(
+      """
+      z = (x, y)
+      x = math.pow(x, 2)
+      """,
+      return: [:x, :y, :z]
+    )
+
+    assert {25, 6, {5, 6}} == {x, y, z}
+    Pythonx.finalize()
+
+    # end
+
+    # test "preserves previous variables" do
+    pyeval(
+      """
+      import math
+      x = 5
+      y = 6
+      """,
+      return: [:x, :y]
+    )
+
+    assert {5, 6} == {x, y}
+    Pythonx.finalize()
+
+    assert_raise RuntimeError, "python_error", fn ->
+      pyeval(
+        """
+        z = (x, y)
+        x = math.pow(x, 2)
+        """,
+        return: [:x]
+      )
+
+      assert x == x
+    end
   end
 end
