@@ -20,7 +20,7 @@ defmodule Pythonx.Test do
 
     # end
 
-    # test "does not preserve previous variables after a finialize call" do
+    # test "preserves previous variables" do
     pyeval(
       """
       import math
@@ -45,7 +45,8 @@ defmodule Pythonx.Test do
 
     # end
 
-    # test "preserves previous variables" do
+    # test "does not preserve previous variables after a finialize call" do
+
     pyeval(
       """
       import math
