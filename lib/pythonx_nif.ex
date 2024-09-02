@@ -12,7 +12,8 @@ defmodule Pythonx.Nif do
     end
   end
 
-  def initialize(_python_home), do: :erlang.nif_error(:not_loaded)
+  def initialize1(_python_home), do: :erlang.nif_error(:not_loaded)
+  def initialize2(_python_home, _minor_version), do: :erlang.nif_error(:not_loaded)
   def eval(_string, _vars, _locals, _globals), do: :erlang.nif_error(:not_loaded)
   def finalize, do: :erlang.nif_error(:not_loaded)
 end
