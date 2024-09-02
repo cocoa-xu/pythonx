@@ -199,11 +199,6 @@ static int pythonx_c_api_initialize(std::optional<std::string> user_python_home)
     }
 
     PyConfig_SetBytesString(&config, &config.home, python_home.c_str());
-
-// #if PY_MINOR_VERSION >= 12
-    // std::string stdlib_dir = python_home + "/lib/python3." + std::to_string(minor_version);
-    // PyConfig_SetBytesString(&config, &config.stdlib_dir, stdlib_dir.c_str());
-// #endif
     PyConfig_SetBytesString(&config, &config.base_prefix, python_home.c_str());
     PyConfig_SetBytesString(&config, &config.base_exec_prefix, python_home.c_str());
     PyConfig_SetBytesString(&config, &config.prefix, python_home.c_str());
