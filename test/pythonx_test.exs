@@ -3,6 +3,11 @@ defmodule Pythonx.Test do
   doctest Pythonx
   import Pythonx
 
+  setup do
+    python_home = "#{:code.priv_dir(:pythonx)}/python3"
+    Pythonx.initialize(python_home)
+  end
+
   test "return and define variables that affect the context" do
     pyeval(
       """

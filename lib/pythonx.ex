@@ -16,6 +16,31 @@ defmodule Pythonx do
     end
   end
 
+  @doc """
+  Initializes the Python with the given path to `python_home`.
+
+  This function must be called before any other function in this module.
+
+  It's expected that the `python_home` is the path to the python3 directory, which contains the following
+  directories and files:
+
+  ```bash
+  - bin
+    - python3
+    - python3.x
+  - include
+  - lib
+    - python3.x
+    - libpython3.x.so (on Linux)
+    - libpython3.x.dylib (on macOS)
+  ```
+
+  It's also expected that this function to be called only once, and it must be called before any other function.
+  """
+  def initialize(python_home) do
+    Pythonx.Nif.initialize(python_home)
+  end
+
   def finalize do
     Pythonx.Nif.finalize()
   end
