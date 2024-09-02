@@ -4,8 +4,7 @@ defmodule Pythonx.Test do
   import Pythonx
 
   test "return and define variables that affect the context" do
-    # python_home = "#{:code.priv_dir(:pythonx)}/python3"
-    python_home = "/Users/cocoa/miniconda3/envs/gst"
+    python_home = "#{:code.priv_dir(:pythonx)}/python3"
     minor_version = 12
     Pythonx.initialize(python_home, minor_version)
 
