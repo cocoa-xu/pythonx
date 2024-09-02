@@ -4,8 +4,10 @@ defmodule Pythonx.Test do
   import Pythonx
 
   test "return and define variables that affect the context" do
-    python_home = "#{:code.priv_dir(:pythonx)}/python3"
-    Pythonx.initialize(python_home)
+    # python_home = "#{:code.priv_dir(:pythonx)}/python3"
+    python_home = "/Users/cocoa/miniconda3/envs/gst"
+    minor_version = 12
+    Pythonx.initialize(python_home, minor_version)
 
     pyeval(
       """
@@ -25,7 +27,7 @@ defmodule Pythonx.Test do
     # end
 
     # test "preserves previous variables" do
-    Pythonx.initialize(python_home)
+    Pythonx.initialize(python_home, minor_version)
 
     pyeval(
       """
@@ -52,7 +54,7 @@ defmodule Pythonx.Test do
     # end
 
     # test "does not preserve previous variables after a finialize call" do
-    Pythonx.initialize(python_home)
+    Pythonx.initialize(python_home, minor_version)
 
     pyeval(
       """

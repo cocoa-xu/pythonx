@@ -37,13 +37,16 @@ defmodule Pythonx do
 
   It's also expected that this function to be called only once, and it must be called before any other function.
   """
-  def initialize(python_home, opts \\ []) do
-    minor_version = opts[:minor_version]
-    if minor_version do
-      Pythonx.Nif.initialize2(python_home, minor_version)
-    else
-      Pythonx.Nif.initialize1(python_home)
-    end
+  def initialize(python_home, minor_version) do
+    Pythonx.Nif.initialize2(python_home, minor_version)
+  end
+
+  def initialize(python_home) do
+    Pythonx.Nif.initialize1(python_home)
+  end
+
+  def initialize do
+    Pythonx.Nif.initialize1(python_home())
   end
 
   def finalize do
