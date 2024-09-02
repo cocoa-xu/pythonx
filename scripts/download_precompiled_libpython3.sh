@@ -136,11 +136,11 @@ unarchive_libpython3() {
         echo "[+] Unarchiving libpython3 ${LIBPYTHON3_VERSION}..."
         mkdir -p "${PRIV_DIR}/python${LIBPYTHON3_VERSION}"
         if [ -e "$(which tar)" ]; then
-            tar -xzf "${PRECOMPILED_LIBPYTHON3_TARBALL}" -C "${PRIV_DIR}/python${LIBPYTHON3_VERSION}" ;
+            tar -xzf "${PRECOMPILED_LIBPYTHON3_TARBALL}" -C "${PRIV_DIR}/python${LIBPYTHON3_VERSION}" --strip-components=3 ;
             rm -rf "${PRIV_DIR}/python3" && \
             cd "${PRIV_DIR}" && \
             ln -s "python${LIBPYTHON3_VERSION}" "python3" && \
-            cd python3/usr/local/lib && \
+            cd python3/lib && \
             if [ ! -f "libpython3.${SO_FILE_EXT}" ]; then
                 ln -s "libpython3.${LIBPYTHON3_MINOR_VERSION}.${SO_FILE_EXT}" "libpython3.${SO_FILE_EXT}" ;
             fi

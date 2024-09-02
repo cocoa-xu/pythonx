@@ -87,7 +87,7 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 		cmake -S "$(shell pwd)" \
 			-B "$(CMAKE_PYTHONX_BUILD_DIR)" \
 		 	-D CMAKE_BUILD_TYPE="$(CMAKE_BUILD_TYPE)" \
-			-D Python3_ROOT_DIR="$(PRIV_DIR)/python$(PYTHON3_VERSION)/usr/local" \
+			-D Python3_ROOT_DIR="$(PRIV_DIR)/python$(PYTHON3_VERSION)" \
 			-D C_SRC="$(C_SRC)" \
 			-D ERTS_INCLUDE_DIR="$(ERTS_INCLUDE_DIR)" \
 			-D MIX_APP_PATH="$(MIX_APP_PATH)" \
@@ -96,7 +96,7 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 		cmake --build "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" -j$(DEFAULT_JOBS) && \
 		cmake --install "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" && \
 		if [ "$(CHANGE_INSTALL_NAME)" = "1" ]; then \
-			install_name_tool -change /usr/local/lib/libpython$(PYTHON3_VERSION_MAJOR).$(PYTHON3_VERSION_MINOR).dylib @loader_path/python3/usr/local/lib/libpython3.dylib "$(NIF_SO)" ; \
+			install_name_tool -change /usr/local/lib/libpython$(PYTHON3_VERSION_MAJOR).$(PYTHON3_VERSION_MINOR).dylib @loader_path/python3/lib/libpython3.dylib "$(NIF_SO)" ; \
 		fi ; \
 	fi
 

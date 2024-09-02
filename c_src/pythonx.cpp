@@ -174,7 +174,7 @@ static std::optional<ERL_NIF_TERM> python_items_in_dict_to(ErlNifEnv *env, PyObj
 
 // ------- Python C API functions -------
 
-static int pythonx_c_api_initialize(std::optional<std::string> user_python_home, std::optional<int> user_minor_version) {
+static int pythonx_c_api_initialize(std::optional<std::string> user_python_home) {
     python_mutex = enif_mutex_create(pythonx_mutex_name);
     if (python_mutex == nullptr) {
         return -1;
@@ -189,7 +189,7 @@ static int pythonx_c_api_initialize(std::optional<std::string> user_python_home,
         if (dladdr((const void *)&pythonx_c_api_initialize, &info)) {
             std::string path = info.dli_fname;
             std::string dir = path.substr(0, path.find_last_of("/"));
-            python_home = dir + "/python3." + std::to_string(PY_MAJOR_VERSION) + "." + std::to_string(PY_MINOR_VERSION);
+            python_home = dir + "/python3";
         } else {
             fprintf(stderr, "Cannot find any libpython in pythonx\r\n");
             return -1;
@@ -198,52 +198,19 @@ static int pythonx_c_api_initialize(std::optional<std::string> user_python_home,
         python_home = user_python_home.value();
     }
 
-    python_home += "/usr/local";
-
     PyConfig_SetBytesString(&config, &config.home, python_home.c_str());
 
-    // if no minor version specified, try to find the minor version from 3.8 to 3.99
-    // should last for a while
-    int minor_version = 8;
-    bool specified_minor_version = false;
-    if (user_minor_version) {
-        specified_minor_version = true;
-        minor_version = user_minor_version.value();
-    }
-
-update_py_config:
-#if PY_MINOR_VERSION >= 12
-    std::string stdlib_dir = python_home + "/lib/python3." + std::to_string(minor_version);
-    PyConfig_SetBytesString(&config, &config.stdlib_dir, stdlib_dir.c_str());
-#endif
+// #if PY_MINOR_VERSION >= 12
+    // std::string stdlib_dir = python_home + "/lib/python3." + std::to_string(minor_version);
+    // PyConfig_SetBytesString(&config, &config.stdlib_dir, stdlib_dir.c_str());
+// #endif
     PyConfig_SetBytesString(&config, &config.base_prefix, python_home.c_str());
     PyConfig_SetBytesString(&config, &config.base_exec_prefix, python_home.c_str());
     PyConfig_SetBytesString(&config, &config.prefix, python_home.c_str());
     PyConfig_SetBytesString(&config, &config.exec_prefix, python_home.c_str());
 
 #ifndef __APPLE__
-    std::string so_file = python_home + "/lib/libpython3." + std::to_string(minor_version) + ".so";
-#else
-    std::string so_file = python_home + "/lib/libpython3." + std::to_string(minor_version) + ".dylib";
-#endif
-
-    // check if the libpython file exists
-    if (access(so_file.c_str(), F_OK) == -1) {
-        if (specified_minor_version) {
-            fprintf(stderr, "Cannot find %s\r\n", so_file.c_str());
-            return -1;
-        } else {
-            minor_version++;
-            if (minor_version < 100) {
-                goto update_py_config;
-            } else {
-                fprintf(stderr, "Cannot find any libpython\r\n");
-                return -1;
-            }
-        }
-    }
-
-#ifndef __APPLE__
+    std::string so_file = python_home + "/lib/libpython3.so";
     void *handle = dlopen(so_file.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (!handle) {
         fprintf(stderr, "Error loading libpython: %s\r\n", dlerror());
@@ -251,35 +218,18 @@ update_py_config:
     }
 #endif
 
-    return 0;   
+    return 0;
 }
 
 // ------- NIF functions -------
 
-static ERL_NIF_TERM pythonx_initialize1(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM pythonx_initialize(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     std::string python_home;
     if (!erlang::nif::get(env, argv[0], python_home)) {
         return enif_make_badarg(env);
     }
 
-    if (!pythonx_c_api_initialize(python_home, std::nullopt)) {
-        return erlang::nif::ok(env);
-    } else {
-        return erlang::nif::error(env, "Cannot initialize Python");
-    }
-}
-
-static ERL_NIF_TERM pythonx_initialize2(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    std::string python_home;
-    if (!erlang::nif::get(env, argv[0], python_home)) {
-        return enif_make_badarg(env);
-    }
-    int minor_version = 0;
-    if (!erlang::nif::get(env, argv[1], &minor_version)) {
-        return enif_make_badarg(env);
-    }
-
-    if (!pythonx_c_api_initialize(python_home, minor_version)) {
+    if (!pythonx_c_api_initialize(python_home)) {
         return erlang::nif::ok(env);
     } else {
         return erlang::nif::error(env, "Cannot initialize Python");
@@ -287,6 +237,8 @@ static ERL_NIF_TERM pythonx_initialize2(ErlNifEnv *env, int argc, const ERL_NIF_
 }
 
 static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    if (python_mutex == nullptr) pythonx_c_api_initialize(std::nullopt);
+
     std::string python_code;
     if (!erlang::nif::get(env, argv[0], python_code)) {
         return enif_make_badarg(env);
@@ -381,6 +333,10 @@ static ERL_NIF_TERM pythonx_finalize(ErlNifEnv *env, int argc, const ERL_NIF_TER
     return erlang::nif::ok(env);
 }
 
+static ERL_NIF_TERM pythonx_nif_loaded(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    return erlang::nif::ok(env);
+}
+
 static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
     return 0;
 }
@@ -394,10 +350,10 @@ static int on_upgrade(ErlNifEnv *_sth0, void **_sth1, void **_sth2, ERL_NIF_TERM
 }
 
 static ErlNifFunc nif_functions[] = {
-    {"initialize1", 1, pythonx_initialize1, 0},
-    {"initialize2", 2, pythonx_initialize2, 0},
+    {"initialize", 1, pythonx_initialize, 0},
     {"eval", 4, pythonx_eval, 0},
     {"finalize", 0, pythonx_finalize, 0},
+    {"nif_loaded", 0, pythonx_nif_loaded, 0}
 };
 
 ERL_NIF_INIT(Elixir.Pythonx.Nif, nif_functions, on_load, on_reload, on_upgrade, NULL);
