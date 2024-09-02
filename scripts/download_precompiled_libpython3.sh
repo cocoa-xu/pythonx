@@ -141,7 +141,9 @@ unarchive_libpython3() {
             cd "${PRIV_DIR}" && \
             ln -s "python${LIBPYTHON3_VERSION}" "python3" && \
             cd python3/usr/local/lib && \
-            ln -s "libpython3.${LIBPYTHON3_MINOR_VERSION}.${SO_FILE_EXT}" "libpython3.${SO_FILE_EXT}" ;
+            if [ ! -f "libpython3.${SO_FILE_EXT}" ]; then
+                ln -s "libpython3.${LIBPYTHON3_MINOR_VERSION}.${SO_FILE_EXT}" "libpython3.${SO_FILE_EXT}" ;
+            fi
         else
             echo "[!] Cannot find tar to unarchive the tarball"
             exit 1
