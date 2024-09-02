@@ -147,7 +147,7 @@ defmodule Pythonx.Nif do
     tarball_url =
       "https://github.com/cocoa-xu/libpython3-build/releases/download/v#{version}/libpython3-#{target_triplet}.tar.gz"
 
-    python_target_dir = "python#{version}-#{target_triplet}"
+    python_target_dir = "python#{version}"
     python_dir = Path.join([priv_dir, python_target_dir])
     python_tar = Path.join([cache_dir, "pythonx-libpython#{version}-#{target_triplet}.tar.gz"])
 
