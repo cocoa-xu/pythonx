@@ -3,12 +3,10 @@ defmodule Pythonx.Test do
   doctest Pythonx
   import Pythonx
 
-  setup do
+  test "return and define variables that affect the context" do
     python_home = "#{:code.priv_dir(:pythonx)}/python3"
     Pythonx.initialize(python_home)
-  end
 
-  test "return and define variables that affect the context" do
     pyeval(
       """
       import math
@@ -19,6 +17,7 @@ defmodule Pythonx.Test do
       """,
       return: [:x, :y, :z]
     )
+
     Pythonx.finalize()
 
     assert {25, 6, {5, 6}} == {x, y, z}
@@ -26,6 +25,8 @@ defmodule Pythonx.Test do
     # end
 
     # test "preserves previous variables" do
+    Pythonx.initialize(python_home)
+
     pyeval(
       """
       import math
@@ -51,6 +52,7 @@ defmodule Pythonx.Test do
     # end
 
     # test "does not preserve previous variables after a finialize call" do
+    Pythonx.initialize(python_home)
 
     pyeval(
       """
