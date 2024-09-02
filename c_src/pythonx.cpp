@@ -53,13 +53,13 @@ static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * val) {
     if (PyTuple_Check(val)) {
         return python_tuple_to(env, val);
     }
-    if (Py_IsNone(val)) {
+    if (val == Py_None) {
         return erlang::nif::atom(env, "nil");
     }
-    if (Py_IsFalse(val)) {
+    if (val == Py_False) {
         return erlang::nif::atom(env, "false");
     }
-    if (Py_IsTrue(val)) {
+    if (val == Py_True) {
         return erlang::nif::atom(env, "true");
     }
     if (PyList_Check(val)) {
@@ -76,7 +76,6 @@ static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * val) {
     Py_DECREF(type_name_obj);
 
     return erlang::nif::atom(env, "nil");
-    // return ret;
 }
 
 static std::optional<ERL_NIF_TERM> python_dict_to(ErlNifEnv *env, PyObject * dict) {
@@ -190,7 +189,7 @@ static int pythonx_c_api_initialize(std::optional<std::string> user_python_home,
         if (dladdr((const void *)&pythonx_c_api_initialize, &info)) {
             std::string path = info.dli_fname;
             std::string dir = path.substr(0, path.find_last_of("/"));
-            python_home = dir + "/python3";
+            python_home = dir + "/python3." + std::to_string(PY_MAJOR_VERSION) + "." + std::to_string(PY_MINOR_VERSION);
         } else {
             fprintf(stderr, "Cannot find any libpython in pythonx\r\n");
             return -1;
@@ -198,6 +197,8 @@ static int pythonx_c_api_initialize(std::optional<std::string> user_python_home,
     } else {
         python_home = user_python_home.value();
     }
+
+    python_home += "/usr/local";
 
     PyConfig_SetBytesString(&config, &config.home, python_home.c_str());
 
@@ -211,8 +212,10 @@ static int pythonx_c_api_initialize(std::optional<std::string> user_python_home,
     }
 
 update_py_config:
+#if PY_MINOR_VERSION >= 12
     std::string stdlib_dir = python_home + "/lib/python3." + std::to_string(minor_version);
     PyConfig_SetBytesString(&config, &config.stdlib_dir, stdlib_dir.c_str());
+#endif
     PyConfig_SetBytesString(&config, &config.base_prefix, python_home.c_str());
     PyConfig_SetBytesString(&config, &config.base_exec_prefix, python_home.c_str());
     PyConfig_SetBytesString(&config, &config.prefix, python_home.c_str());

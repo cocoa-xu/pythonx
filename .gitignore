@@ -31,3 +31,4 @@ pybeam-*.tar
 /build/
 
 checksum.exs
+.DS_Store
