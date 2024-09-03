@@ -24,7 +24,7 @@ jobs:
       matrix:
         job:
           - { otp_version: "26", elixir_version: "1.15" }
-          - { otp_version: "24", elixir_version: "1.13" }
+          - { otp_version: "24", elixir_version: "1.14" }
 
     name: Linux x86_64 - OTP ${{ matrix.job.otp_version }}
 
