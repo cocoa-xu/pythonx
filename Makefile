@@ -101,7 +101,7 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 	fi
 
 clean:
-	@ rm -rf "$(PRIV_DIR)/python$(PYTHON3_VERSION)"
+	@ rm -rf "$(PRIV_DIR)"
 	@ rm -rf "$(NIF_SO)"
 	@ rm -rf "$(PYTHON3_SOURCE_DIR)"
 
