@@ -99,7 +99,7 @@ jobs:
           cd ./cache/elixir
           tar -xzf elixir-${{ env.ELIXIR_VERSION }}.tar.gz
           cd elixir-${{ env.ELIXIR_VERSION }}
-          make -j$(sysctl -n hw.ncpu) install
+          sudo make -j$(sysctl -n hw.ncpu) install
 
       - name: Install Mix and Rebar
         run: |
