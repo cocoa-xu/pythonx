@@ -15,7 +15,7 @@ jobs:
       MIX_ENV: prod
     strategy:
       matrix:
-        otp_version: [25]
+        otp_version: [24]
 
     name: Linux - OTP ${{ matrix.otp_version }}
 
@@ -26,7 +26,7 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp_version }}
-          elixir-version: 1.16
+          elixir-version: 1.15
 
       - name: Install system dependecies
         run: |
