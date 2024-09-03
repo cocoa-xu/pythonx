@@ -83,7 +83,7 @@ $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 	fi
 
 $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
-	@ if [ ! -f $(NIF_SO) ]; then \
+	if [ ! -f $(NIF_SO) ]; then \
 		cmake -S "$(shell pwd)" \
 			-B "$(CMAKE_PYTHONX_BUILD_DIR)" \
 		 	-D CMAKE_BUILD_TYPE="$(CMAKE_BUILD_TYPE)" \
@@ -102,9 +102,9 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 
 clean:
 	@ echo "Cleaning..."
-	@ rm -rf "$(PRIV_DIR)"
-	@ rm -rf "$(NIF_SO)"
-	@ rm -rf "$(PYTHON3_SOURCE_DIR)"
+	rm -rf "$(PRIV_DIR)"
+	rm -rf "$(NIF_SO)"
+	rm -rf "$(PYTHON3_SOURCE_DIR)"
 
 clean_pythonx:
-	@ rm -rf "$(NIF_SO)"
+	rm -rf "$(NIF_SO)"
