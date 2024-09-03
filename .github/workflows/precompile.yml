@@ -81,6 +81,7 @@ jobs:
           curl -fSL https://github.com/cocoa-xu/otp-build/releases/download/v${{ matrix.otp_version }}/otp-arm64-apple-darwin.tar.gz -o ./cache/otp/otp-v${{ matrix.otp_version }}-arm64-apple-darwin.tar.gz
           cd ./cache/otp
           tar -xzf otp-v${{ matrix.otp_version }}-arm64-apple-darwin.tar.gz
+          cd usr/local/lib/erlang && ./Install -sasl $(pwd)
 
       - name: Cache Elixir
         id: cache-elixir
