@@ -59,7 +59,7 @@ jobs:
       ELIXIR_VERSION: "1.16.0"
     strategy:
       matrix:
-        otp_version: ["24.3.4.16"]
+        otp_version: ["25.3.2.12"]
 
     name: macOS - OTP ${{ matrix.otp_version }}
 
