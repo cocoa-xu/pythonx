@@ -53,7 +53,7 @@ jobs:
             cache/*.sha256
 
   macos:
-    runs-on: macos-12
+    runs-on: macos-14
     env:
       MIX_ENV: prod
       ELIXIR_VERSION: "1.16.0"
@@ -78,9 +78,9 @@ jobs:
         if: steps.cache-otp.outputs.cache-hit != 'true'
         run: |
           mkdir -p ./cache/otp
-          curl -fSL https://github.com/cocoa-xu/otp-build/releases/download/v${{ matrix.otp_version }}/otp-x86_64-apple-darwin.tar.gz -o ./cache/otp/otp-v${{ matrix.otp_version }}-x86_64-apple-darwin.tar.gz
+          curl -fSL https://github.com/cocoa-xu/otp-build/releases/download/v${{ matrix.otp_version }}/otp-arm64-apple-darwin.tar.gz -o ./cache/otp/otp-v${{ matrix.otp_version }}-arm64-apple-darwin.tar.gz
           cd ./cache/otp
-          tar -xzf otp-v${{ matrix.otp_version }}-x86_64-apple-darwin.tar.gz
+          tar -xzf otp-v${{ matrix.otp_version }}-arm64-apple-darwin.tar.gz
 
       - name: Cache Elixir
         id: cache-elixir
