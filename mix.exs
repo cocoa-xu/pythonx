@@ -2,7 +2,7 @@ defmodule Pythonx.MixProject do
   use Mix.Project
 
   @app :pythonx
-  @version "0.2.0-dev"
+  @version "0.2.0"
   @github_url "https://github.com/cocoa-xu/pythonx"
 
   def project do
