@@ -15,8 +15,6 @@ if [ -z "$LIBPYTHON3_MINOR_VERSION" ] || [ -z "$LIBPYTHON3_PATCH_VERSION" ]; the
   exit 1
 fi
 
-echo "LIBPYTHON3_VERSION: ${LIBPYTHON3_VERSION}"
-
 get_triplet() {
   if [ "${PYTHONX_LIBPYTHON3_TRIPLET}" = "native" ]; then
     if [[ -n "${TARGET_ARCH}" && -n "${TARGET_OS}" && -n "${TARGET_ABI}" ]]; then
@@ -133,7 +131,7 @@ download_libpython3() {
 
 unarchive_libpython3() {
     if [ ! -d "${PRIV_DIR}/python${LIBPYTHON3_VERSION}" ]; then
-        echo "[+] Unarchiving libpython3 ${LIBPYTHON3_VERSION}..."
+        echo "[+] Unarchiving libpython${LIBPYTHON3_VERSION}..."
         mkdir -p "${PRIV_DIR}/python${LIBPYTHON3_VERSION}"
         if [ -e "$(which tar)" ]; then
             tar -xzf "${PRECOMPILED_LIBPYTHON3_TARBALL}" -C "${PRIV_DIR}/python${LIBPYTHON3_VERSION}" --strip-components=3 ;
