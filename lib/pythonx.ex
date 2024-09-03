@@ -46,6 +46,7 @@ defmodule Pythonx do
     unless Pythonx.Nif.nif_loaded() do
       Pythonx.Nif.load_nif({:custom, python_home})
     end
+
     Pythonx.Nif.initialize(python_home)
   end
 

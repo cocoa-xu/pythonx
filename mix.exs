@@ -30,6 +30,7 @@ defmodule Pythonx.MixProject do
       make_precompiler_nif_versions: [versions: ["2.16"]],
       cc_precompiler: [
         cleanup: "clean",
+        only_listed_targets: true,
         compilers: %{
           {:unix, :linux} => %{
             "x86_64-linux-gnu" => {
@@ -54,7 +55,18 @@ defmodule Pythonx.MixProject do
             }
           },
           {:unix, :darwin} => %{
-            :include_default_ones => true
+            "x86_64-apple-darwin" => {
+              "gcc",
+              "g++",
+              "<%= cc %> -arch x86_64",
+              "<%= cxx %> -arch x86_64"
+            },
+            "aarch64-apple-darwin" => {
+              "gcc",
+              "g++",
+              "<%= cc %> -arch arm64",
+              "<%= cxx %> -arch arm64"
+            }
           }
         }
       ]
