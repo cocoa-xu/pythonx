@@ -364,7 +364,6 @@ static ERL_NIF_TERM pythonx_inline(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
         python_initialized = true;
     }
 
-    // todo: optimize: only send variables that are used in the python code
     for (auto& var : elixir_vars) {
         // send elixir variables to python
         PyDict_SetItemString(local_dict, var.first.c_str(), erl_to_python(env, var.second).value());

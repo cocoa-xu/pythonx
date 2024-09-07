@@ -77,5 +77,20 @@ defmodule Pythonx.Test do
 
       assert x == x
     end
+
+    # end
+
+    # test "inline python" do
+    a = "Elixir"
+
+    pyinline(
+      """
+      a = a + " 🤝"
+      b = f"{a} Python!"
+      """,
+      return: [:a, :b]
+    )
+
+    assert {"Elixir 🤝", "Elixir 🤝 Python!"} == {a, b}
   end
 end
