@@ -13,10 +13,10 @@ static ErlNifMutex * python_mutex = nullptr;
 static bool python_initialized = false;
 static PyObject * local_dict;
 static PyObject * global_dict;
+static PyConfig config;
 
 // ------- Helper functions for NIF -------
-
-static PyConfig config;
+// Convert Python objects to Erlang terms
 static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * dict);
 static std::optional<ERL_NIF_TERM> python_dict_to(ErlNifEnv *env, PyObject * dict);
 static std::optional<ERL_NIF_TERM> python_tuple_to(ErlNifEnv *env, PyObject * dict);
@@ -172,6 +172,97 @@ static std::optional<ERL_NIF_TERM> python_items_in_dict_to(ErlNifEnv *env, PyObj
     return erl_dict;
 }
 
+// Convert Erlang NIF terms to Python objects
+static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term) {
+    if (enif_is_atom(env, term)) {
+        if (enif_is_identical(term, erlang::nif::atom(env, "nil"))) {
+            return Py_None;
+        }
+        if (enif_is_identical(term, erlang::nif::atom(env, "true"))) {
+            return Py_True;
+        }
+        if (enif_is_identical(term, erlang::nif::atom(env, "false"))) {
+            return Py_False;
+        }
+
+        std::string atom;
+        if (erlang::nif::get_atom(env, term, atom)) {
+            return PyUnicode_DecodeUTF8(atom.c_str(), atom.size(), "strict");
+        } else {
+            // todo: better error handling
+            // return None if get_atom fails for now
+            return Py_None;
+        }
+    } else if (enif_is_binary(env, term)) {
+        ErlNifBinary binary;
+        if (enif_inspect_binary(env, term, &binary)) {
+            return PyUnicode_DecodeUTF8((const char *)binary.data, binary.size, "strict");
+        } else {
+            // todo: return None if enif_inspect_binary fails
+            return Py_None;
+        }
+    } else if (enif_is_list(env, term)) {
+        ERL_NIF_TERM head, tail;
+        if (enif_get_list_cell(env, term, &head, &tail)) {
+            std::vector<PyObject *> list;
+            while (enif_get_list_cell(env, term, &head, &tail)) {
+                auto item = erl_to_python(env, head);
+                if (item) {
+                    list.emplace_back(item.value());
+                } else {
+                    // todo: return None for unsupported types for now
+                    return Py_None;
+                }
+                term = tail;
+            }
+            PyObject *py_list = PyList_New(list.size());
+            for (size_t i = 0; i < list.size(); ++i) {
+                PyList_SetItem(py_list, i, list[i]);
+            }
+            return py_list;
+        }
+    } else if (enif_is_tuple(env, term)) {
+        int arity;
+        const ERL_NIF_TERM *arr;
+        if (enif_get_tuple(env, term, &arity, &arr)) {
+            // n-tuple maps to n-ary tuple in Python
+            PyObject *py_tuple = PyTuple_New(arity);
+            for (int i = 0; i < arity; ++i) {
+                auto item = erl_to_python(env, arr[i]);
+                if (item) {
+                    PyTuple_SetItem(py_tuple, i, item.value());
+                } else {
+                    // todo: set None for unsupported types for now
+                    PyTuple_SetItem(py_tuple, i, Py_None);
+                }
+            }
+        } else {
+            // todo: this should not happen
+            // but if it does, return None for now
+            return Py_None;
+        }
+    } else if (enif_is_number(env, term)) {
+        ErlNifUInt64 u64;
+        if (enif_get_uint64(env, term, &u64)) {
+            return PyLong_FromUnsignedLongLong(u64);
+        }
+        ErlNifSInt64 i64;
+        if (enif_get_int64(env, term, &i64)) {
+            return PyLong_FromLongLong(i64);
+        }
+        double num;
+        if (enif_get_double(env, term, &num)) {
+            return PyFloat_FromDouble(num);
+        }
+
+        // todo: return None for unsupported types for now
+        return Py_None;
+    }
+
+    // todo: return None for unsupported types for now
+    return Py_None;
+}
+
 // ------- Python C API functions -------
 
 static int pythonx_c_api_initialize(std::optional<std::string> user_python_home) {
@@ -231,7 +322,7 @@ static ERL_NIF_TERM pythonx_initialize(ErlNifEnv *env, int argc, const ERL_NIF_T
     }
 }
 
-static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM pythonx_inline(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     if (python_mutex == nullptr) pythonx_c_api_initialize(std::nullopt);
 
     std::string python_code;
@@ -248,6 +339,10 @@ static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
     }
     bool get_globals = false;
     if (!erlang::nif::get(env, argv[3], &get_globals)) {
+        return enif_make_badarg(env);
+    }
+    std::map<std::string, ERL_NIF_TERM> elixir_vars;
+    if (!erlang::nif::parse_arg(env, 4, argv, elixir_vars)) {
         return enif_make_badarg(env);
     }
     ERL_NIF_TERM ret{};
@@ -267,6 +362,12 @@ static ERL_NIF_TERM pythonx_eval(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
         PyDict_SetItemString(global_dict, "__builtins__", PyEval_GetBuiltins());
         
         python_initialized = true;
+    }
+
+    // todo: optimize: only send variables that are used in the python code
+    for (auto& var : elixir_vars) {
+        // send elixir variables to python
+        PyDict_SetItemString(local_dict, var.first.c_str(), erl_to_python(env, var.second).value());
     }
 
     PyObject *result = PyRun_String(python_code.c_str(), Py_file_input, global_dict, local_dict);
@@ -346,7 +447,7 @@ static int on_upgrade(ErlNifEnv *_sth0, void **_sth1, void **_sth2, ERL_NIF_TERM
 
 static ErlNifFunc nif_functions[] = {
     {"initialize", 1, pythonx_initialize, 0},
-    {"eval", 4, pythonx_eval, 0},
+    {"inline", 5, pythonx_inline, 0},
     {"finalize", 0, pythonx_finalize, 0},
     {"nif_loaded", 0, pythonx_nif_loaded, 0}
 };

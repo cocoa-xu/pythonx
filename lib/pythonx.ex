@@ -17,8 +17,31 @@ defmodule Pythonx do
     quoted_vars = Enum.map(vars, fn var -> Macro.var(var, nil) end)
 
     quote do
-      [unquote_splicing(quoted_vars)] = Pythonx.eval!(unquote(code), unquote(opts))
+      [unquote_splicing(quoted_vars)] = Pythonx.inline!(unquote(code), unquote(opts))
     end
+  end
+
+  defmacro pyinline(code, opts \\ []) do
+    vars = Keyword.get(opts, :return, [])
+    opts = [locals: false, globals: false, return: vars]
+    quoted_vars = Enum.map(vars, fn var -> Macro.var(var, nil) end)
+
+    quote do
+      [unquote_splicing(quoted_vars)] = Pythonx.inline!(unquote(code), unquote(opts) ++ [binding: binding()])
+    end
+  end
+
+  @doc """
+  Inline Python code.
+  """
+  def inline_py do
+    Pythonx.initialize_once()
+
+    a = 1
+    pyinline """
+    a = 2 + a
+    """, return: [:a]
+    a
   end
 
   @doc """
@@ -56,6 +79,13 @@ defmodule Pythonx do
     end
 
     Pythonx.Nif.initialize(python_home())
+  end
+
+  def initialize_once(python_home \\ python_home()) do
+    unless Pythonx.Nif.nif_loaded() do
+      Pythonx.Nif.load_nif(:embedded)
+      Pythonx.Nif.initialize(python_home)
+    end
   end
 
   def finalize do
@@ -128,15 +158,27 @@ defmodule Pythonx do
     vars = opts[:return] || []
     locals = opts[:locals] || false
     globals = opts[:globals] || false
-    Pythonx.Nif.eval(code, vars, locals, globals)
+    Pythonx.Nif.inline(code, vars, locals, globals, [])
   end
 
   def eval!(code, opts \\ []) do
+    with {:ok, result} <- Pythonx.inline(code, opts) do
+      result
+    else
+      {:error, reason} -> raise reason
+    end
+  end
+
+  def inline(code, opts \\ []) do
     vars = opts[:return] || []
     locals = opts[:locals] || false
     globals = opts[:globals] || false
+    binding = opts[:binding] || []
+    Pythonx.Nif.inline(code, vars, locals, globals, binding)
+  end
 
-    with {:ok, result} <- Pythonx.Nif.eval(code, vars, locals, globals) do
+  def inline!(code, opts \\ []) do
+    with {:ok, result} <- Pythonx.inline(code, opts) do
       result
     else
       {:error, reason} -> raise reason
