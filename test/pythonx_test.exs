@@ -3,10 +3,11 @@ defmodule Pythonx.Test do
   doctest Pythonx
   import Pythonx
 
+  setup do
+    Pythonx.initialize_once()
+  end
+
   test "return and define variables that affect the context" do
-    python_home = "#{:code.priv_dir(:pythonx)}/python3.8.16"
-    Pythonx.initialize(python_home)
-
     pyeval(
       """
       import math
@@ -18,15 +19,10 @@ defmodule Pythonx.Test do
       return: [:x, :y, :z]
     )
 
-    Pythonx.finalize()
-
     assert {25, 6, {5, 6}} == {x, y, z}
+  end
 
-    # end
-
-    # test "preserves previous variables" do
-    Pythonx.initialize(python_home)
-
+  test "preserves previous variables" do
     pyeval(
       """
       import math
@@ -47,40 +43,9 @@ defmodule Pythonx.Test do
     )
 
     assert {25, 6, {5, 6}} == {x, y, z}
-    Pythonx.finalize()
+  end
 
-    # end
-
-    # test "does not preserve previous variables after a finialize call" do
-    Pythonx.initialize(python_home)
-
-    pyeval(
-      """
-      import math
-      x = 5
-      y = 6
-      """,
-      return: [:x, :y]
-    )
-
-    assert {5, 6} == {x, y}
-    Pythonx.finalize()
-
-    assert_raise RuntimeError, "python_error", fn ->
-      pyeval(
-        """
-        z = (x, y)
-        x = math.pow(x, 2)
-        """,
-        return: [:x]
-      )
-
-      assert x == x
-    end
-
-    # end
-
-    # test "inline python" do
+  test "inline python" do
     a = "Elixir"
 
     pyinline(

@@ -189,6 +189,8 @@ defmodule Pythonx do
       Pythonx.Nif.load_nif(:embedded)
       Pythonx.Nif.initialize(python_home)
     end
+
+    :ok
   end
 
   def finalize do
