@@ -274,7 +274,7 @@ defmodule Pythonx.Nif do
   end
 
   def initialize(_python_home), do: :erlang.nif_error(:not_loaded)
-  def eval(_string, _vars, _locals, _globals), do: :erlang.nif_error(:not_loaded)
+  def inline(_string, _vars, _locals, _globals, _binding), do: :erlang.nif_error(:not_loaded)
   def finalize, do: :erlang.nif_error(:not_loaded)
   def nif_loaded, do: false
 end
