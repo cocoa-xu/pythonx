@@ -4,12 +4,12 @@ LIBPYTHON3_MINOR_VERSION=$1
 LIBPYTHON3_PATCH_VERSION=$2
 LIBPYTHON3_CACHE_DIR=$3
 PRIV_DIR=$4
-PYTHONX_LIBPYTHON3_TRIPLET=$5
+Python3_ROOT_DIR=$5
+PYTHONX_LIBPYTHON3_TRIPLET=$6
 
 LIBPYTHON3_MAJOR_VERSION=3
 LIBPYTHON3_VERSION="${LIBPYTHON3_MAJOR_VERSION}.${LIBPYTHON3_MINOR_VERSION}.${LIBPYTHON3_PATCH_VERSION}"
 PRECOMPILED_LIBPYTHON3_URL_BASE="https://github.com/cocoa-xu/libpython3-build/releases/download/v${LIBPYTHON3_VERSION}"
-TARGET_DIR="${PRIV_DIR}/python${LIBPYTHON3_VERSION}"
 
 if [ -z "$LIBPYTHON3_MINOR_VERSION" ] || [ -z "$LIBPYTHON3_PATCH_VERSION" ]; then
   echo "[!] Usage: $0 <libpython3_minor_version> <libpython3_patch_version> <libpython3_cache_dir> <priv_dir> <pythonx_libpython3_triplet>"
@@ -131,11 +131,11 @@ download_libpython3() {
 }
 
 unarchive_libpython3() {
-    if [ ! -d "${TARGET_DIR}" ]; then
-        echo "[+] Unarchiving libpython${LIBPYTHON3_VERSION} to ${TARGET_DIR}..."
-        mkdir -p "${TARGET_DIR}"
+    if [ ! -d "${Python3_ROOT_DIR}" ]; then
+        echo "[+] Unarchiving libpython${LIBPYTHON3_VERSION} to ${Python3_ROOT_DIR}..."
+        mkdir -p "${Python3_ROOT_DIR}"
         if [ -e "$(which tar)" ]; then
-            tar -C "${TARGET_DIR}" -xzf "${PRECOMPILED_LIBPYTHON3_TARBALL}" --strip-components=3 ;
+            tar -C "${Python3_ROOT_DIR}" -xzf "${PRECOMPILED_LIBPYTHON3_TARBALL}" --strip-components=3 ;
             rm -rf "${PRIV_DIR}/python3" && \
             cd "${PRIV_DIR}" && \
             ln -s "python${LIBPYTHON3_VERSION}" "python3" && \
