@@ -18,6 +18,7 @@ PYTHON3_LIBRARY_DIR = $(PRIV_DIR)/python$(PYTHON3_VERSION)/usr/local/lib
 PYTHONX_PREFER_PRECOMPILED_LIBPYTHON3 ?= true
 PYTHONX_LIBPYTHON3_TRIPLET ?= native
 CMAKE_PYTHONX_BUILD_DIR = $(MIX_APP_PATH)/cmake_pythonx
+Python3_ROOT_DIR = $(PRIV_DIR)/python$(PYTHON3_VERSION)
 
 ifdef CC_PRECOMPILER_CURRENT_TARGET
 	PYTHONX_LIBPYTHON3_TRIPLET=$(CC_PRECOMPILER_CURRENT_TARGET)
@@ -59,26 +60,32 @@ $(PRIV_DIR):
 	@ mkdir -p $(PRIV_DIR)
 
 $(PYTHON3_SOURCE_TARBALL): $(CACHE_DIR)
-	@ if [ ! -f $(PYTHON3_SOURCE_TARBALL) ]; then \
-		curl -fSL "$(PYTHON3_SOURCE_URL)" -o "$(PYTHON3_SOURCE_TARBALL)" ; \
+	@ if [ "$(PYTHONX_PREFER_PRECOMPILED_LIBPYTHON3)" != "true" ]; then \
+		if [ ! -f $(PYTHON3_SOURCE_TARBALL) ]; then \
+			curl -fSL "$(PYTHON3_SOURCE_URL)" -o "$(PYTHON3_SOURCE_TARBALL)" ; \
+		fi \
 	fi
 
 $(PYTHON3_SOURCE_DIR): $(PYTHON3_SOURCE_TARBALL)
-	@ if [ ! -d "$(PYTHON3_SOURCE_DIR)" ]; then \
-		tar -xzf "$(PYTHON3_SOURCE_TARBALL)" -C "$(CACHE_DIR)" ; \
+	@ if [ "$(PYTHONX_PREFER_PRECOMPILED_LIBPYTHON3)" != "true" ]; then \
+		if [ ! -d "$(PYTHON3_SOURCE_DIR)" ]; then \
+			tar -xzf "$(PYTHON3_SOURCE_TARBALL)" -C "$(CACHE_DIR)" ; \
+		fi \
 	fi
 
 $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 	@ if [ ! -d "$(PYTHON3_LIBRARY_DIR)" ]; then \
 		if [ "$(PYTHONX_PREFER_PRECOMPILED_LIBPYTHON3)" = "true" ]; then \
-			bash ./scripts/download_precompiled_libpython3.sh "$(PYTHON3_VERSION_MINOR)" "$(PYTHON3_VERSION_PATCH)" "$(CACHE_DIR)" "$(PRIV_DIR)" "$(PYTHONX_LIBPYTHON3_TRIPLET)" ; \
+			bash ./scripts/download_precompiled_libpython3.sh "$(PYTHON3_VERSION_MINOR)" "$(PYTHON3_VERSION_PATCH)" "$(CACHE_DIR)" "$(PRIV_DIR)" "$(Python3_ROOT_DIR)" "$(PYTHONX_LIBPYTHON3_TRIPLET)" ; \
 			STATUS=$$? ; \
-		fi ; \
-		if [ "$$STATUS" != "0" ]; then \
+			if [ "$$STATUS" != "0" ]; then \
+				echo "[!] Cannot download precompiled libpython3" ; \
+			fi ; \
+		else \
 			cd $(PYTHON3_SOURCE_DIR) && \
-			CPP=cpp ./configure --prefix=/usr/local --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
+			CPP=cpp ./configure --prefix="$(Python3_ROOT_DIR)" --enable-optimizations --with-lto=full --enable-shared=yes --with-static-libpython=no && \
 			make $(MAKE_BUILD_FLAGS) && \
-			make DESTDIR="$(PRIV_DIR)/python$(PYTHON3_VERSION)" install ; \
+			make install ; \
 		fi ; \
 	fi
 
@@ -87,7 +94,7 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 		cmake -S "$(shell pwd)" \
 			-B "$(CMAKE_PYTHONX_BUILD_DIR)" \
 		 	-D CMAKE_BUILD_TYPE="$(CMAKE_BUILD_TYPE)" \
-			-D Python3_ROOT_DIR="$(PRIV_DIR)/python$(PYTHON3_VERSION)" \
+			-D Python3_ROOT_DIR="$(Python3_ROOT_DIR)" \
 			-D C_SRC="$(C_SRC)" \
 			-D ERTS_INCLUDE_DIR="$(ERTS_INCLUDE_DIR)" \
 			-D MIX_APP_PATH="$(MIX_APP_PATH)" \
@@ -102,6 +109,8 @@ $(NIF_SO): $(PYTHON3_LIBRARY_DIR)
 
 clean:
 	@ echo "Cleaning..."
+	rm -rf "$(Python3_ROOT_DIR)"
+	rm -rf "$(CMAKE_PYTHONX_BUILD_DIR)"
 	rm -rf "$(PRIV_DIR)"
 	rm -rf "$(NIF_SO)"
 	rm -rf "$(PYTHON3_SOURCE_DIR)"
