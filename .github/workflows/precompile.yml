@@ -53,7 +53,7 @@ jobs:
             cache/*.sha256
 
   macos:
-    runs-on: macos-12
+    runs-on: ${{ matrix.job.runs-on }}
     env:
       MIX_ENV: prod
       ELIXIR_VERSION: "1.16"
@@ -62,9 +62,9 @@ jobs:
       matrix:
         job:
           - { otp_version: "25.3", runs-on: macos-12, arch: "x86_64" }
-          - { otp_version: "25.3", runs-on: macos-14, arch: "arm64" }
+          - { otp_version: "25.3", runs-on: macos-14, arch: "aarch64" }
 
-    name: macOS ${{ matrix.job.arch }} - OTP ${{ matrix.job.otp_version }}
+    name: ${{ matrix.job.arch }}-apple-drawin - OTP ${{ matrix.job.otp_version }}
 
     steps:
       - name: Checkout
