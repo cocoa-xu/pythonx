@@ -8,6 +8,13 @@
 #include <vector>
 #include <dlfcn.h>
 
+// Atoms
+STATIC_ATOM(Ok, "ok");
+STATIC_ATOM(Nil, "nil");
+STATIC_ATOM(True, "true");
+STATIC_ATOM(False, "false");
+STATIC_ATOM(Error, "error");
+
 char pythonx_mutex_name[] = {"python_mutex"};
 static ErlNifMutex * python_mutex = nullptr;
 static bool python_initialized = false;
@@ -54,13 +61,13 @@ static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * val) {
         return python_tuple_to(env, val);
     }
     if (val == Py_None) {
-        return erlang::nif::atom(env, "nil");
+        return kAtomNil;
     }
     if (val == Py_False) {
-        return erlang::nif::atom(env, "false");
+        return kAtomFalse;
     }
     if (val == Py_True) {
-        return erlang::nif::atom(env, "true");
+        return kAtomTrue;
     }
     if (PyList_Check(val)) {
         return python_list_to(env, val);
@@ -75,7 +82,7 @@ static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * val) {
     Py_DECREF(type_obj);
     Py_DECREF(type_name_obj);
 
-    return erlang::nif::atom(env, "nil");
+    return kAtomNil;
 }
 
 static std::optional<ERL_NIF_TERM> python_dict_to(ErlNifEnv *env, PyObject * dict) {
@@ -147,8 +154,7 @@ static std::optional<ERL_NIF_TERM> python_items_in_dict_to(ErlNifEnv *env, PyObj
         return ret;
     }
 
-    auto nil = erlang::nif::atom(env, "nil");
-    std::vector<ERL_NIF_TERM> erl_values(keys.size(), nil);
+    std::vector<ERL_NIF_TERM> erl_values(keys.size(), kAtomNil);
     Py_ssize_t dict_keys_size = PyList_Size(dict_keys);
     if (dict_keys_size != 0) {
         for (Py_ssize_t i = 0; i < dict_keys_size; ++i) {
@@ -175,13 +181,13 @@ static std::optional<ERL_NIF_TERM> python_items_in_dict_to(ErlNifEnv *env, PyObj
 // Convert Erlang NIF terms to Python objects
 static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term) {
     if (enif_is_atom(env, term)) {
-        if (enif_is_identical(term, erlang::nif::atom(env, "nil"))) {
+        if (enif_is_identical(term, kAtomNil)) {
             return Py_None;
         }
-        if (enif_is_identical(term, erlang::nif::atom(env, "true"))) {
+        if (enif_is_identical(term, kAtomTrue)) {
             return Py_True;
         }
-        if (enif_is_identical(term, erlang::nif::atom(env, "false"))) {
+        if (enif_is_identical(term, kAtomFalse)) {
             return Py_False;
         }
 
@@ -316,7 +322,7 @@ static ERL_NIF_TERM pythonx_initialize(ErlNifEnv *env, int argc, const ERL_NIF_T
     }
 
     if (!pythonx_c_api_initialize(python_home)) {
-        return erlang::nif::ok(env);
+        return kAtomOk;
     } else {
         return erlang::nif::error(env, "Cannot initialize Python");
     }
@@ -425,11 +431,21 @@ static ERL_NIF_TERM pythonx_finalize(ErlNifEnv *env, int argc, const ERL_NIF_TER
     }
 
     enif_mutex_unlock(python_mutex);
-    return erlang::nif::ok(env);
+    return kAtomOk;
 }
 
 static ERL_NIF_TERM pythonx_nif_loaded(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    return erlang::nif::ok(env);
+#define MAKE_STATIC_ATOM
+
+    STATIC_ATOM(Ok, "ok");
+    STATIC_ATOM(Nil, "nil");
+    STATIC_ATOM(True, "true");
+    STATIC_ATOM(False, "false");
+    STATIC_ATOM(Error, "error");
+
+#undef MAKE_STATIC_ATOM
+
+    return kAtomOk;
 }
 
 static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {

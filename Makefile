@@ -6,6 +6,7 @@ PRIV_DIR = $(MIX_APP_PATH)/priv
 NIF_SO = $(PRIV_DIR)/pythonx.so
 
 C_SRC = $(shell pwd)/c_src
+C_SRC_FILES = $(wildcard $(C_SRC)/*.cpp) $(wildcard $(C_SRC)/*.h) $(wildcard $(C_SRC)/*.hpp)
 PYTHON3_VERSION_MAJOR = 3
 PYTHON3_VERSION_MINOR = 8
 PYTHON3_VERSION_PATCH = 16
@@ -89,24 +90,22 @@ $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 		fi ; \
 	fi
 
-$(NIF_SO): $(PYTHON3_LIBRARY_DIR)
-	@ if [ ! -f $(NIF_SO) ]; then \
-		cmake -S "$(shell pwd)" \
-			-B "$(CMAKE_PYTHONX_BUILD_DIR)" \
-		 	-D CMAKE_BUILD_TYPE="$(CMAKE_BUILD_TYPE)" \
-			-D Python3_ROOT_DIR="$(Python3_ROOT_DIR)" \
-			-D PYTHON3_VERSION_MINOR="$(PYTHON3_VERSION_MINOR)" \
-			-D C_SRC="$(C_SRC)" \
-			-D ERTS_INCLUDE_DIR="$(ERTS_INCLUDE_DIR)" \
-			-D MIX_APP_PATH="$(MIX_APP_PATH)" \
-			-D CMAKE_INSTALL_PREFIX="$(PRIV_DIR)" \
-			$(CMAKE_CONFIGURE_FLAGS) && \
-		cmake --build "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" -j$(DEFAULT_JOBS) && \
-		cmake --install "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" && \
-		if [ "$(CHANGE_INSTALL_NAME)" = "1" ]; then \
-			install_name_tool -change /usr/local/lib/libpython$(PYTHON3_VERSION_MAJOR).$(PYTHON3_VERSION_MINOR).dylib @loader_path/python3/lib/libpython3.dylib "$(NIF_SO)" ; \
-		fi ; \
-	fi
+$(NIF_SO): $(PYTHON3_LIBRARY_DIR) $(C_SRC_FILES)
+	cmake -S "$(shell pwd)" \
+		-B "$(CMAKE_PYTHONX_BUILD_DIR)" \
+		-D CMAKE_BUILD_TYPE="$(CMAKE_BUILD_TYPE)" \
+		-D Python3_ROOT_DIR="$(Python3_ROOT_DIR)" \
+		-D PYTHON3_VERSION_MINOR="$(PYTHON3_VERSION_MINOR)" \
+		-D C_SRC="$(C_SRC)" \
+		-D ERTS_INCLUDE_DIR="$(ERTS_INCLUDE_DIR)" \
+		-D MIX_APP_PATH="$(MIX_APP_PATH)" \
+		-D CMAKE_INSTALL_PREFIX="$(PRIV_DIR)" \
+		$(CMAKE_CONFIGURE_FLAGS) && \
+	cmake --build "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" -j$(DEFAULT_JOBS) && \
+	cmake --install "$(CMAKE_PYTHONX_BUILD_DIR)" --config "$(CMAKE_BUILD_TYPE)" && \
+	if [ "$(CHANGE_INSTALL_NAME)" = "1" ]; then \
+		install_name_tool -change /usr/local/lib/libpython$(PYTHON3_VERSION_MAJOR).$(PYTHON3_VERSION_MINOR).dylib @loader_path/python3/lib/libpython3.dylib "$(NIF_SO)" ; \
+	fi ;
 
 clean:
 	@ echo "Cleaning..."

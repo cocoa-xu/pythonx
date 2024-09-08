@@ -10,6 +10,14 @@
 #include <cstdint>
 #include <unordered_set>
 
+#ifndef MAKE_STATIC_ATOM
+#define STATIC_ATOM(name, val) \
+  static ERL_NIF_TERM kAtom##name
+#else
+#define STATIC_ATOM(name, val) \
+  kAtom##name = enif_make_atom(env, val)
+#endif
+
 namespace erlang
 {
   namespace nif

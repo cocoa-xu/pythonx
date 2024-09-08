@@ -77,6 +77,7 @@ if(WIN32)
 endif()
 set(PYTHONX_SOURCE_FILES
     "${C_SRC}/pythonx.cpp"
+    "${C_SRC}/nif_utils.hpp"
 )
 set(CMAKE_CXX_STANDARD 17)
 add_library(pythonx SHARED
