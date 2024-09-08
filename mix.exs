@@ -83,6 +83,7 @@ defmodule Pythonx.MixProject do
     [
       {:elixir_make, "~> 0.8"},
       {:cc_precompiler, "~> 0.1"},
+      {:jason, "~> 1.2"},
       {:req, "~> 0.3"},
       {:ex_doc, "~> 0.34", only: :docs, runtime: false}
     ]
