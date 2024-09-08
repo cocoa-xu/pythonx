@@ -1,12 +1,12 @@
 defmodule Pythonx.Test do
   use ExUnit.Case, async: false
-  doctest Pythonx
   import Pythonx
 
   setup do
     Pythonx.initialize_once()
   end
 
+  @tag :pyeval
   test "return and define variables that affect the context, and preserves previous variables" do
     pyeval(
       """

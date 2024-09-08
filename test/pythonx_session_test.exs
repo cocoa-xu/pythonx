@@ -2,7 +2,7 @@ defmodule Pythonx.SessionTest do
   use ExUnit.Case, async: false
   import Pythonx
 
-  @tag :session
+  @tag :pyeval
   test "does not preserve previous variables after a finialize call" do
     Pythonx.initialize()
 

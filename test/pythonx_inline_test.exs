@@ -1,13 +1,12 @@
 defmodule Pythonx.Inline.Test do
   use ExUnit.Case, async: false
-  doctest Pythonx
   import Pythonx
 
   setup do
     Pythonx.initialize_once()
   end
 
-  @tag :skip
+  @tag :pyinline
   test "inline python" do
     a = "Elixir"
 
