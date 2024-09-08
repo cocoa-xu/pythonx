@@ -9,11 +9,11 @@
 #include <dlfcn.h>
 
 // Atoms
-STATIC_ATOM(Ok, "ok");
-STATIC_ATOM(Nil, "nil");
-STATIC_ATOM(True, "true");
-STATIC_ATOM(False, "false");
-STATIC_ATOM(Error, "error");
+STATIC_ATOM(Ok);
+STATIC_ATOM(Nil);
+STATIC_ATOM(True);
+STATIC_ATOM(False);
+STATIC_ATOM(Error);
 
 char pythonx_mutex_name[] = {"python_mutex"};
 static ErlNifMutex * python_mutex = nullptr;
@@ -435,20 +435,16 @@ static ERL_NIF_TERM pythonx_finalize(ErlNifEnv *env, int argc, const ERL_NIF_TER
 }
 
 static ERL_NIF_TERM pythonx_nif_loaded(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-#define MAKE_STATIC_ATOM
-
-    STATIC_ATOM(Ok, "ok");
-    STATIC_ATOM(Nil, "nil");
-    STATIC_ATOM(True, "true");
-    STATIC_ATOM(False, "false");
-    STATIC_ATOM(Error, "error");
-
-#undef MAKE_STATIC_ATOM
-
     return kAtomOk;
 }
 
 static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
+    kAtomOk = erlang::nif::atom(env, "ok");
+    kAtomNil = erlang::nif::atom(env, "nil");
+    kAtomTrue = erlang::nif::atom(env, "true");
+    kAtomFalse = erlang::nif::atom(env, "false");
+    kAtomError = erlang::nif::atom(env, "error");
+
     return 0;
 }
 
