@@ -1,4 +1,4 @@
-defmodule Pythonx.Raw.PyObject do
+defmodule Pythonx.C.PyObject do
   @moduledoc """
   Python Object
   """

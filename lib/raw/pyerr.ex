@@ -1,9 +1,9 @@
-defmodule Pythonx.Raw.PyErr do
+defmodule Pythonx.C.PyErr do
   @moduledoc """
   Python Exception
   """
 
-  alias Pythonx.Raw.PyObject
+  alias Pythonx.C.PyObject
 
   @type t :: %__MODULE__{
           type: PyObject.t() | nil,

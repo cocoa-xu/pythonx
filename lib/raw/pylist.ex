@@ -1,10 +1,10 @@
-defmodule Pythonx.Raw.PyList do
+defmodule Pythonx.C.PyList do
   @moduledoc """
   This subtype of PyObject represents a Python list object.
   """
 
-  alias Pythonx.Raw.PyObject
-  alias Pythonx.Raw.PyErr
+  alias Pythonx.C.PyObject
+  alias Pythonx.C.PyErr
 
   @doc """
   Return true if `p` is a list object or an instance of a subtype of the list type.

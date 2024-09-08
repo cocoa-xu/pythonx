@@ -1079,7 +1079,7 @@ static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
     kAtomValue = erlang::nif::atom(env, "value");
     kAtomTraceback = erlang::nif::atom(env, "traceback");
 
-    kModulePythonxRawPyErr = enif_make_atom(env, "Elixir.Pythonx.Raw.PyErr");
+    kModulePythonxRawPyErr = enif_make_atom(env, "Elixir.Pythonx.C.PyErr");
 
     ErlNifResourceType *rt;
     {

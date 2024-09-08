@@ -1,4 +1,4 @@
-defmodule Pythonx.Raw.PyUnicode do
+defmodule Pythonx.C.PyUnicode do
   @moduledoc """
   Unicode Objects
   """

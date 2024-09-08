@@ -1,8 +1,8 @@
-defmodule Pythonx.Raw.PyObject.Test do
+defmodule Pythonx.C.PyObject.Test do
   use ExUnit.Case, async: false
 
-  alias Pythonx.Raw.PyObject
-  alias Pythonx.Raw.PyUnicode
+  alias Pythonx.C.PyObject
+  alias Pythonx.C.PyUnicode
 
   setup do
     Pythonx.initialize_once()
