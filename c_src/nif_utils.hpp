@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <optional>
 #include <unordered_set>
 
 #define STATIC_ATOM(name) static ERL_NIF_TERM kAtom##name
@@ -32,6 +33,20 @@ namespace erlang
     ERL_NIF_TERM error(ErlNifEnv *env, const char *msg)
     {
       ERL_NIF_TERM atom_error = atom(env, "error");
+      ERL_NIF_TERM reason;
+      unsigned char * ptr;
+      size_t len = strlen(msg);
+      if ((ptr = enif_make_new_binary(env, len, &reason)) != nullptr) {
+          strcpy((char *)ptr, msg);
+          return enif_make_tuple2(env, atom_error, reason);
+      } else {
+          ERL_NIF_TERM msg_term = enif_make_string(env, msg, ERL_NIF_LATIN1);
+          return enif_make_tuple2(env, atom_error, msg_term);
+      }
+    }
+
+    ERL_NIF_TERM error(ErlNifEnv *env, ERL_NIF_TERM atom_error, const char *msg)
+    {
       ERL_NIF_TERM reason;
       unsigned char * ptr;
       size_t len = strlen(msg);
@@ -145,6 +160,25 @@ namespace erlang
     ERL_NIF_TERM make(ErlNifEnv *env, const char *string)
     {
       return enif_make_string(env, string, ERL_NIF_LATIN1);
+    }
+
+    std::optional<ERL_NIF_TERM> make_binary(ErlNifEnv *env, const char *string, size_t length)
+    {
+      ERL_NIF_TERM term;
+      unsigned char * data = enif_make_new_binary(env, length, &term);
+      if (data != nullptr) {
+        memcpy(data, string, length);
+        return term;
+      } else {
+        return std::nullopt;
+      }
+    }
+
+    std::optional<ERL_NIF_TERM> make_binary(ErlNifEnv *env, const char *string)
+    {
+      ERL_NIF_TERM term;
+      size_t length = strlen(string);
+      return make_binary(env, string, length);
     }
 
     template<typename T>

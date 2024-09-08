@@ -22,6 +22,43 @@ static PyObject * local_dict;
 static PyObject * global_dict;
 static PyConfig config;
 
+#define likely(x)       __builtin_expect(!!(x), 1)
+#define unlikely(x)     __builtin_expect(!!(x), 0)
+
+struct PyObjectNifRes {
+    PyObject * val;
+    static ErlNifResourceType *type;
+};
+static void destruct_py_object(ErlNifEnv *env, void * args) {
+    // args can't be nullptr
+    // Py_XDECREF check if val is nullptr before decrementing the reference count
+    auto val = ((struct PyObjectNifRes *)args)->val;
+    Py_XDECREF(val);
+}
+ErlNifResourceType * PyObjectNifRes::type = nullptr;
+
+template <typename T>
+auto allocate_resource() -> T * {
+    return (T *)enif_alloc_resource(T::type, sizeof(T));
+}
+
+template <typename T>
+auto allocate_resource(ErlNifEnv *env, ERL_NIF_TERM &error) -> T * {
+    T *res = allocate_resource<T>();
+    if (unlikely(res == nullptr)) {
+      error = erlang::nif::error(env, kAtomError, "cannot allocate Nif resource");
+      return res;
+    }
+    return res;
+}
+
+template <typename T>
+auto get_resource(ErlNifEnv *env, ERL_NIF_TERM term) -> T * {
+    T *res = nullptr;
+    enif_get_resource(env, term, T::type, reinterpret_cast<void **>(&res));
+    return res;
+}
+
 // ------- Helper functions for NIF -------
 // Convert Python objects to Erlang terms
 static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * dict);
@@ -271,6 +308,23 @@ static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term
 
 // ------- Python C API functions -------
 
+static void init_locals_and_globals() {
+    if (!python_initialized) {
+        PyStatus status = Py_InitializeFromConfig(&config);
+        if (PyStatus_Exception(status)) {
+            Py_ExitStatusException(status);
+        }
+
+        local_dict = PyDict_New();
+        global_dict = PyDict_New();
+
+        // Initialize globals with the __builtins__ module to enable built-in functions
+        PyDict_SetItemString(global_dict, "__builtins__", PyEval_GetBuiltins());
+        
+        python_initialized = true;
+    }
+}
+
 static int pythonx_c_api_initialize(std::optional<std::string> user_python_home) {
     python_mutex = enif_mutex_create(pythonx_mutex_name);
     if (python_mutex == nullptr) {
@@ -309,6 +363,10 @@ static int pythonx_c_api_initialize(std::optional<std::string> user_python_home)
         return -1;
     }
 #endif
+
+    enif_mutex_lock(python_mutex);
+    init_locals_and_globals();
+    enif_mutex_unlock(python_mutex);
 
     return 0;
 }
@@ -355,20 +413,7 @@ static ERL_NIF_TERM pythonx_inline(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
 
     enif_mutex_lock(python_mutex);
 
-    if (!python_initialized) {
-        PyStatus status = Py_InitializeFromConfig(&config);
-        if (PyStatus_Exception(status)) {
-            Py_ExitStatusException(status);
-        }
-
-        local_dict = PyDict_New();
-        global_dict = PyDict_New();
-
-        // Initialize globals with the __builtins__ module to enable built-in functions
-        PyDict_SetItemString(global_dict, "__builtins__", PyEval_GetBuiltins());
-        
-        python_initialized = true;
-    }
+    init_locals_and_globals();
 
     for (auto& var : elixir_vars) {
         // send elixir variables to python
@@ -438,6 +483,403 @@ static ERL_NIF_TERM pythonx_nif_loaded(ErlNifEnv *env, int argc, const ERL_NIF_T
     return kAtomOk;
 }
 
+static ERL_NIF_TERM pythonx_py_none(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ret{};
+    PyObjectNifRes *res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(res == nullptr)) return kAtomError;
+
+    Py_INCREF(Py_None);
+    res->val = Py_None;
+    ret = enif_make_resource(env, res);
+    enif_release_resource(res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_true(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ret{};
+    PyObjectNifRes *res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(res == nullptr)) return kAtomError;
+
+    Py_INCREF(Py_True);
+    res->val = Py_True;
+    ret = enif_make_resource(env, res);
+    enif_release_resource(res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_false(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ret{};
+    PyObjectNifRes *res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(res == nullptr)) return kAtomError;
+
+    Py_INCREF(Py_False);
+    res->val = Py_False;
+    ret = enif_make_resource(env, res);
+    enif_release_resource(res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_incref(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    Py_XINCREF(res->val);
+    return ref;
+}
+
+static ERL_NIF_TERM pythonx_py_decref(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    Py_XDECREF(res->val);
+    return ref;
+}
+
+static ERL_NIF_TERM py_object_has_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *attr_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyObject_HasAttr(res->val, attr_res->val);
+    if (result == 1) return kAtomTrue;
+    return kAtomFalse;
+}
+
+static ERL_NIF_TERM py_object_has_attr_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    std::string attr_name;
+    if (!erlang::nif::get(env, argv[1], attr_name)) {
+        return enif_make_badarg(env);
+    }
+
+    int result = PyObject_HasAttrString(res->val, attr_name.c_str());
+    if (result == 1) return kAtomTrue;
+    return kAtomFalse;
+}
+
+static ERL_NIF_TERM py_object_get_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *attr_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyObject_GetAttr(res->val, attr_res->val);
+    if (unlikely(result == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM py_object_get_attr_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    std::string attr_name;
+    if (!erlang::nif::get(env, argv[1], attr_name)) {
+        return enif_make_badarg(env);
+    }
+
+    PyObject *result = PyObject_GetAttrString(res->val, attr_name.c_str());
+    if (unlikely(result == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM py_object_generic_get_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *attr_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyObject_GenericGetAttr(res->val, attr_res->val);
+    if (unlikely(result == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM py_object_set_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *attr_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *v = NULL;
+    PyObjectNifRes *val_res = get_resource<PyObjectNifRes>(env, argv[2]);
+    if (unlikely(val_res == nullptr)) {
+        if (!enif_is_identical(argv[2], kAtomNil)) {
+            return enif_make_badarg(env);
+        }
+    } else {
+        v = val_res->val;
+    }
+
+    int result = PyObject_SetAttr(res->val, attr_res->val, v);
+    if (result == -1) return kAtomFalse;
+    return kAtomTrue;
+}
+
+static ERL_NIF_TERM py_object_set_attr_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    std::string attr_name;
+    if (!erlang::nif::get(env, argv[1], attr_name)) {
+        return enif_make_badarg(env);
+    }
+
+    PyObject *v = NULL;
+    PyObjectNifRes *val_res = get_resource<PyObjectNifRes>(env, argv[2]);
+    if (unlikely(val_res == nullptr)) {
+        if (!enif_is_identical(argv[2], kAtomNil)) {
+            return enif_make_badarg(env);
+        }
+    } else {
+        v = val_res->val;
+    }
+
+    int result = PyObject_SetAttrString(res->val, attr_name.c_str(), v);
+    if (result == -1) return kAtomFalse;
+    return kAtomTrue;
+}
+
+static ERL_NIF_TERM py_object_generic_set_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *attr_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *v = NULL;
+    PyObjectNifRes *val_res = get_resource<PyObjectNifRes>(env, argv[2]);
+    if (unlikely(val_res == nullptr)) {
+        if (!enif_is_identical(argv[2], kAtomNil)) {
+            return enif_make_badarg(env);
+        }
+    } else {
+        v = val_res->val;
+    }
+
+    int result = PyObject_GenericSetAttr(res->val, attr_res->val, v);
+    if (result == -1) return kAtomFalse;
+    return kAtomTrue;
+}
+
+static ERL_NIF_TERM py_object_del_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *attr_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyObject_DelAttr(res->val, attr_res->val);
+    if (result == 1) return kAtomTrue;
+    return kAtomFalse;
+}
+
+static ERL_NIF_TERM py_object_del_attr_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    std::string attr_name;
+    if (!erlang::nif::get(env, argv[1], attr_name)) {
+        return enif_make_badarg(env);
+    }
+
+    int result = PyObject_DelAttrString(res->val, attr_name.c_str());
+    if (result == 1) return kAtomTrue;
+    return kAtomFalse;
+}
+
+static ERL_NIF_TERM pythonx_py_object_is_true(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyObject_IsTrue(res->val);
+    if (result == 1) return kAtomTrue;
+    else if (result == 0) return kAtomFalse;
+    else return kAtomError;
+}
+
+static ERL_NIF_TERM pythonx_py_object_not(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyObject_Not(res->val);
+    if (result == 1) return kAtomTrue;
+    else if (result == 0) return kAtomFalse;
+    else return kAtomError;
+}
+
+static ERL_NIF_TERM pythonx_py_object_type(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject * result = PyObject_Type(res->val);
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_object_length(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    Py_ssize_t result = PyObject_Length(res->val);
+    if (result == -1) return kAtomError;
+    return enif_make_int64(env, result);
+}
+
+static ERL_NIF_TERM pythonx_py_object_repr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyObject_Repr(res->val);
+    if (unlikely(result == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_object_ascii(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyObject_ASCII(res->val);
+    if (unlikely(result == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_object_str(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyObject_Str(res->val);
+    if (unlikely(result == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_object_bytes(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyObject_Bytes(res->val);
+    if (unlikely(result == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_unicode_from_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    std::string str;
+    if (!erlang::nif::get(env, argv[0], str)) {
+        return enif_make_badarg(env);
+    }
+
+    PyObject *py_str = PyUnicode_FromString(str.c_str());
+    if (unlikely(py_str == nullptr)) return kAtomNil;
+
+    PyObjectNifRes *res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(res == nullptr)) {
+        Py_DECREF(py_str);
+        return kAtomError;
+    }
+
+    res->val = py_str;
+    ERL_NIF_TERM ret = enif_make_resource(env, res);
+    enif_release_resource(res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_unicode_as_utf8(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    const char* py_utf8 = PyUnicode_AsUTF8(res->val);
+    if (unlikely(py_utf8 == nullptr)) return kAtomNil;
+    
+    auto data = erlang::nif::make_binary(env, py_utf8);
+    if (unlikely(!data.has_value())) return kAtomError;
+    return data.value();
+}
+
 static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
     kAtomOk = erlang::nif::atom(env, "ok");
     kAtomNil = erlang::nif::atom(env, "nil");
@@ -445,6 +887,14 @@ static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
     kAtomFalse = erlang::nif::atom(env, "false");
     kAtomError = erlang::nif::atom(env, "error");
 
+    ErlNifResourceType *rt;
+    {
+        using res_type = PyObjectNifRes;
+        rt = enif_open_resource_type(env, "Elixir.Pythonx.Nif", "Pythonx.PyObject", destruct_py_object, ERL_NIF_RT_CREATE, NULL);
+        if (!rt) return -1;
+        res_type::type = rt;
+    }
+    
     return 0;
 }
 
@@ -460,7 +910,35 @@ static ErlNifFunc nif_functions[] = {
     {"initialize", 1, pythonx_initialize, 0},
     {"inline", 5, pythonx_inline, 0},
     {"finalize", 0, pythonx_finalize, 0},
-    {"nif_loaded", 0, pythonx_nif_loaded, 0}
+    {"nif_loaded", 0, pythonx_nif_loaded, 0},
+    
+    {"py_none", 0, pythonx_py_none, 0},
+    {"py_true", 0, pythonx_py_true, 0},
+    {"py_false", 0, pythonx_py_false, 0},
+    {"py_incref", 1, pythonx_py_incref, 0},
+    {"py_decref", 1, pythonx_py_decref, 0},
+
+    {"py_object_has_attr", 2, py_object_has_attr, 0},
+    {"py_object_has_attr_string", 2, py_object_has_attr_string, 0},
+    {"py_object_get_attr", 2, py_object_get_attr, 0},
+    {"py_object_get_attr_string", 2, py_object_get_attr_string, 0},
+    {"py_object_generic_get_attr", 2, py_object_generic_get_attr, 0},
+    {"py_object_set_attr", 3, py_object_get_attr, 0},
+    {"py_object_set_attr_string", 3, py_object_get_attr_string, 0},
+    {"py_object_generic_set_attr", 3, py_object_generic_set_attr, 0},
+    {"py_object_del_attr", 2, py_object_del_attr, 0},
+    {"py_object_del_attr_string", 2, py_object_del_attr_string, 0},
+    {"py_object_is_true", 1, pythonx_py_object_is_true, 0},
+    {"py_object_not", 1, pythonx_py_object_not, 0},
+    {"py_object_type", 1, pythonx_py_object_type, 0},
+    {"py_object_length", 1, pythonx_py_object_length, 0},
+    {"py_object_repr", 1, pythonx_py_object_repr, 0},
+    {"py_object_ascii", 1, pythonx_py_object_ascii, 0},
+    {"py_object_str", 1, pythonx_py_object_str, 0},
+    {"py_object_bytes", 1, pythonx_py_object_bytes, 0},
+
+    {"py_unicode_from_string", 1, pythonx_py_unicode_from_string, 0},
+    {"py_unicode_as_utf8", 1, pythonx_py_unicode_as_utf8, 0}
 };
 
 ERL_NIF_INIT(Elixir.Pythonx.Nif, nif_functions, on_load, on_reload, on_upgrade, NULL);

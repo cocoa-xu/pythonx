@@ -277,4 +277,32 @@ defmodule Pythonx.Nif do
   def inline(_string, _vars, _locals, _globals, _binding), do: :erlang.nif_error(:not_loaded)
   def finalize, do: :erlang.nif_error(:not_loaded)
   def nif_loaded, do: false
+
+  def py_none, do: :erlang.nif_error(:not_loaded)
+  def py_true, do: :erlang.nif_error(:not_loaded)
+  def py_false, do: :erlang.nif_error(:not_loaded)
+  def py_incref(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_decref(_ref), do: :erlang.nif_error(:not_loaded)
+
+  def py_object_has_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
+  def py_object_has_attr_string(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
+  def py_object_get_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
+  def py_object_get_attr_string(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
+  def py_object_generic_get_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
+  def py_object_set_attr(_ref, _attr_name, _v), do: :erlang.nif_error(:not_loaded)
+  def py_object_set_attr_string(_ref, _attr_name, _v), do: :erlang.nif_error(:not_loaded)
+  def py_object_generic_set_attr(_ref, _attr_name, _v), do: :erlang.nif_error(:not_loaded)
+  def py_object_del_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
+  def py_object_del_attr_string(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
+  def py_object_is_true(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_object_not(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_object_type(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_object_length(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_object_repr(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_object_ascii(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_object_str(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_object_bytes(_ref), do: :erlang.nif_error(:not_loaded)
+
+  def py_unicode_from_string(_string), do: :erlang.nif_error(:not_loaded)
+  def py_unicode_as_utf8(_ref), do: :erlang.nif_error(:not_loaded)
 end
