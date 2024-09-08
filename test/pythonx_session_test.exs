@@ -1,7 +1,8 @@
 defmodule Pythonx.SessionTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   import Pythonx
 
+  @tag :session
   test "does not preserve previous variables after a finialize call" do
     Pythonx.initialize()
 

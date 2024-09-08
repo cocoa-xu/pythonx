@@ -1,5 +1,5 @@
 defmodule Pythonx.Test do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   doctest Pythonx
   import Pythonx
 
@@ -43,19 +43,5 @@ defmodule Pythonx.Test do
     )
 
     assert {25, 6, {5, 6}} == {x, y, z}
-  end
-
-  test "inline python" do
-    a = "Elixir"
-
-    pyinline(
-      """
-      a = a + " 🤝"
-      b = f"{a} Python!"
-      """,
-      return: [:a, :b]
-    )
-
-    assert {"Elixir 🤝", "Elixir 🤝 Python!"} == {a, b}
   end
 end

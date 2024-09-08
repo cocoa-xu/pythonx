@@ -1,5 +1,5 @@
 defmodule Pythonx.Raw.PyUnicode.Test do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Pythonx.Raw.PyUnicode
 
