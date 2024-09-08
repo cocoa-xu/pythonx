@@ -91,7 +91,7 @@ $(PYTHON3_LIBRARY_DIR): $(PRIV_DIR) $(PYTHON3_SOURCE_DIR)
 	fi
 
 $(NIF_SO): $(PYTHON3_LIBRARY_DIR) $(C_SRC_FILES)
-	cmake -S "$(shell pwd)" \
+	@ cmake -S "$(shell pwd)" \
 		-B "$(CMAKE_PYTHONX_BUILD_DIR)" \
 		-D CMAKE_BUILD_TYPE="$(CMAKE_BUILD_TYPE)" \
 		-D Python3_ROOT_DIR="$(Python3_ROOT_DIR)" \

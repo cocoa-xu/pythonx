@@ -284,6 +284,15 @@ defmodule Pythonx.Nif do
   def py_incref(_ref), do: :erlang.nif_error(:not_loaded)
   def py_decref(_ref), do: :erlang.nif_error(:not_loaded)
 
+  def py_list_check(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_list_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_list_new(_len), do: :erlang.nif_error(:not_loaded)
+  def py_list_size(_list), do: :erlang.nif_error(:not_loaded)
+  def py_list_get_item(_list, _index), do: :erlang.nif_error(:not_loaded)
+  def py_list_set_item(_list, _index, _item), do: :erlang.nif_error(:not_loaded)
+  def py_list_insert(_list, _index, _item), do: :erlang.nif_error(:not_loaded)
+  def py_list_append(_list, _item), do: :erlang.nif_error(:not_loaded)
+
   def py_object_has_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
   def py_object_has_attr_string(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
   def py_object_get_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)

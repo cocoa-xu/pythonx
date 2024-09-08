@@ -3,6 +3,9 @@ defmodule Pythonx.Raw.PyObject do
   Python Object
   """
 
+  @type t :: reference()
+  @type borrowed :: reference()
+
   @doc """
   Returns a reference to the Python None object.
 
