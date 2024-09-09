@@ -1,5 +1,6 @@
 defmodule Pythonx.SessionTest do
   use ExUnit.Case, async: false
+
   import Pythonx
 
   @tag :pyeval

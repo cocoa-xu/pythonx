@@ -85,7 +85,8 @@ defmodule Pythonx.MixProject do
       {:cc_precompiler, "~> 0.1"},
       {:jason, "~> 1.2"},
       {:req, "~> 0.3"},
-      {:ex_doc, "~> 0.34", only: :docs, runtime: false}
+      {:ex_doc, "~> 0.34", only: :docs, runtime: false},
+      {:styler, "~> 0.11.9", only: [:dev, :test], runtime: false}
     ]
   end
 

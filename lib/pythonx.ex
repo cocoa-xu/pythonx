@@ -78,24 +78,19 @@ defmodule Pythonx do
             {:ok, %{"status" => "ok", "globals" => globals}} ->
               {:ok, Macro.escape(Map.new(Enum.map(globals, fn global -> {global, true} end)))}
 
-            {:ok,
-             %{"status" => "error", "error" => error, "lineno" => lineno, "offset" => offset}} ->
+            {:ok, %{"status" => "error", "error" => error, "lineno" => lineno, "offset" => offset}} ->
               description = """
               The inline Python code contains syntax errors: #{error} at line #{__CALLER__.line + lineno}, column #{offset}
               """
 
-              {:error,
-               {CompileError,
-                file: __CALLER__.file, line: __CALLER__.line + lineno, description: description}}
+              {:error, {CompileError, file: __CALLER__.file, line: __CALLER__.line + lineno, description: description}}
 
             _ ->
               description = """
               The inline Python code contains unknown errors. #{outputs}
               """
 
-              {:error,
-               {CompileError,
-                file: __CALLER__.file, line: __CALLER__.line, description: description}}
+              {:error, {CompileError, file: __CALLER__.file, line: __CALLER__.line, description: description}}
           end
 
         {outputs, _} ->
@@ -103,8 +98,7 @@ defmodule Pythonx do
           Failed to analyze the inline python code: #{outputs}
           """
 
-          {:error,
-           {CompileError, file: __CALLER__.file, line: __CALLER__.line, description: description}}
+          {:error, {CompileError, file: __CALLER__.file, line: __CALLER__.line, description: description}}
       end
     end
 
@@ -267,9 +261,8 @@ defmodule Pythonx do
   end
 
   def eval!(code, opts \\ []) do
-    with {:ok, result} <- Pythonx.inline(code, opts) do
-      result
-    else
+    case Pythonx.inline(code, opts) do
+      {:ok, result} -> result
       {:error, reason} -> raise reason
     end
   end
@@ -283,9 +276,8 @@ defmodule Pythonx do
   end
 
   def inline!(code, opts \\ []) do
-    with {:ok, result} <- Pythonx.inline(code, opts) do
-      result
-    else
+    case Pythonx.inline(code, opts) do
+      {:ok, result} -> result
       {:error, reason} -> raise reason
     end
   end

@@ -67,6 +67,32 @@ auto get_resource(ErlNifEnv *env, ERL_NIF_TERM term) -> T * {
     return res;
 }
 
+static ERL_NIF_TERM pythonx_current_pyerr(ErlNifEnv *env);
+
+static inline ERL_NIF_TERM nonnull_pyobject_to_nifres(ErlNifEnv *env, PyObject *result, bool borrowed = false) {
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    result_res->borrowed = borrowed;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static inline ERL_NIF_TERM pyobject_to_nifres_or_pyerr(ErlNifEnv *env, PyObject *result, bool borrowed = false) {
+    if (unlikely(result == nullptr)) return pythonx_current_pyerr(env);
+    return nonnull_pyobject_to_nifres(env, result, borrowed);
+}
+
+static inline ERL_NIF_TERM pyobject_to_nifres_or_nil(ErlNifEnv *env, PyObject *result, bool borrowed = false) {
+    if (unlikely(result == nullptr)) return kAtomNil;
+    return nonnull_pyobject_to_nifres(env, result, borrowed);
+}
+
 // ------- Helper functions for NIF -------
 // Convert Python objects to Erlang terms
 static std::optional<ERL_NIF_TERM> python_to(ErlNifEnv *env, PyObject * dict);
@@ -491,7 +517,7 @@ static ERL_NIF_TERM pythonx_nif_loaded(ErlNifEnv *env, int argc, const ERL_NIF_T
     return kAtomOk;
 }
 
-static ERL_NIF_TERM pythonx_current_pyerr(ErlNifEnv *env) {
+ERL_NIF_TERM pythonx_current_pyerr(ErlNifEnv *env) {
     ERL_NIF_TERM ret = kAtomError;
 
     PyObject *type = nullptr, *value = nullptr, *traceback = nullptr;
@@ -632,18 +658,7 @@ static ERL_NIF_TERM pythonx_py_list_new(ErlNifEnv *env, int argc, const ERL_NIF_
     }
 
     PyObject *result = PyList_New(len);
-    if (unlikely(result == nullptr)) return kAtomNil;
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_list_size(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -652,6 +667,7 @@ static ERL_NIF_TERM pythonx_py_list_size(ErlNifEnv *env, int argc, const ERL_NIF
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     Py_ssize_t size = PyList_Size(res->val);
+    if (size == -1) return pythonx_current_pyerr(env);
     return enif_make_int64(env, size);
 }
 
@@ -664,16 +680,7 @@ static ERL_NIF_TERM pythonx_py_list_get_item(ErlNifEnv *env, int argc, const ERL
     if (!erlang::nif::get(env, argv[1], &index)) return enif_make_badarg(env);
 
     PyObject *result = PyList_GetItem(res->val, index);
-    if (result == nullptr) return pythonx_current_pyerr(env);
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) return kAtomError;
-
-    result_res->val = result;
-    result_res->borrowed = true;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result, true);
 }
 
 static ERL_NIF_TERM pythonx_py_list_set_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -725,6 +732,72 @@ static ERL_NIF_TERM pythonx_py_list_append(ErlNifEnv *env, int argc, const ERL_N
     return pythonx_current_pyerr(env);
 }
 
+static ERL_NIF_TERM pythonx_py_list_get_slice(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int64_t low, high;
+    if (!erlang::nif::get(env, argv[1], &low)) return enif_make_badarg(env);
+    if (!erlang::nif::get(env, argv[2], &high)) return enif_make_badarg(env);
+
+    PyObject *result = PyList_GetSlice(res->val, low, high);
+    return pyobject_to_nifres_or_pyerr(env, result);
+}
+
+static ERL_NIF_TERM pythonx_py_list_set_slice(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int64_t low, high;
+    if (!erlang::nif::get(env, argv[1], &low)) return enif_make_badarg(env);
+    if (!erlang::nif::get(env, argv[2], &high)) return enif_make_badarg(env);
+
+    PyObject *itemlist = nullptr;
+    PyObjectNifRes *itemlist_res = get_resource<PyObjectNifRes>(env, argv[3]);
+    if (unlikely(itemlist_res == nullptr)) {
+        if (!enif_is_identical(argv[3], kAtomNil)) {
+            return enif_make_badarg(env);
+        }
+    } else {
+        itemlist = itemlist_res->val;
+    }
+
+    int result = PyList_SetSlice(res->val, low, high, itemlist);
+    if (result == 0) return kAtomTrue;
+    return pythonx_current_pyerr(env);
+}
+
+static ERL_NIF_TERM pythonx_py_list_sort(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyList_Sort(res->val);
+    if (result == 0) return kAtomTrue;
+    return pythonx_current_pyerr(env);
+}
+
+static ERL_NIF_TERM pythonx_py_list_reverse(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyList_Reverse(res->val);
+    if (result == 0) return kAtomTrue;
+    return pythonx_current_pyerr(env);
+}
+
+static ERL_NIF_TERM pythonx_py_list_as_tuple(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyList_AsTuple(res->val);
+    return pyobject_to_nifres_or_pyerr(env, result);
+}
+
 static ERL_NIF_TERM pythonx_py_object_has_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
@@ -759,18 +832,7 @@ static ERL_NIF_TERM pythonx_py_object_get_attr(ErlNifEnv *env, int argc, const E
     if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyObject_GetAttr(res->val, attr_res->val);
-    if (unlikely(result == nullptr)) return kAtomNil;
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_nil(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_object_get_attr_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -783,18 +845,7 @@ static ERL_NIF_TERM pythonx_py_object_get_attr_string(ErlNifEnv *env, int argc, 
     }
 
     PyObject *result = PyObject_GetAttrString(res->val, attr_name.c_str());
-    if (unlikely(result == nullptr)) return kAtomNil;
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_nil(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_object_generic_get_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -805,18 +856,7 @@ static ERL_NIF_TERM pythonx_py_object_generic_get_attr(ErlNifEnv *env, int argc,
     if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyObject_GenericGetAttr(res->val, attr_res->val);
-    if (unlikely(result == nullptr)) return kAtomNil;
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_object_set_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -837,7 +877,7 @@ static ERL_NIF_TERM pythonx_py_object_set_attr(ErlNifEnv *env, int argc, const E
     }
 
     int result = PyObject_SetAttr(res->val, attr_res->val, v);
-    if (result == -1) return kAtomFalse;
+    if (result == -1) return pythonx_current_pyerr(env);
     return kAtomTrue;
 }
 
@@ -861,7 +901,7 @@ static ERL_NIF_TERM pythonx_py_object_set_attr_string(ErlNifEnv *env, int argc, 
     }
 
     int result = PyObject_SetAttrString(res->val, attr_name.c_str(), v);
-    if (result == -1) return kAtomFalse;
+    if (result == -1) return pythonx_current_pyerr(env);
     return kAtomTrue;
 }
 
@@ -883,7 +923,7 @@ static ERL_NIF_TERM pythonx_py_object_generic_set_attr(ErlNifEnv *env, int argc,
     }
 
     int result = PyObject_GenericSetAttr(res->val, attr_res->val, v);
-    if (result == -1) return kAtomFalse;
+    if (result == -1) return pythonx_current_pyerr(env);
     return kAtomTrue;
 }
 
@@ -895,7 +935,7 @@ static ERL_NIF_TERM pythonx_py_object_del_attr(ErlNifEnv *env, int argc, const E
     if (unlikely(attr_res == nullptr)) return enif_make_badarg(env);
 
     int result = PyObject_DelAttr(res->val, attr_res->val);
-    if (result == 1) return kAtomTrue;
+    if (result == -1) return kAtomFalse;
     return kAtomFalse;
 }
 
@@ -938,16 +978,7 @@ static ERL_NIF_TERM pythonx_py_object_type(ErlNifEnv *env, int argc, const ERL_N
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject * result = PyObject_Type(res->val);
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_object_length(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -955,7 +986,6 @@ static ERL_NIF_TERM pythonx_py_object_length(ErlNifEnv *env, int argc, const ERL
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     Py_ssize_t result = PyObject_Length(res->val);
-    if (result == -1) return kAtomError;
     return enif_make_int64(env, result);
 }
 
@@ -964,18 +994,7 @@ static ERL_NIF_TERM pythonx_py_object_repr(ErlNifEnv *env, int argc, const ERL_N
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyObject_Repr(res->val);
-    if (unlikely(result == nullptr)) return kAtomNil;
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_object_ascii(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -983,18 +1002,7 @@ static ERL_NIF_TERM pythonx_py_object_ascii(ErlNifEnv *env, int argc, const ERL_
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyObject_ASCII(res->val);
-    if (unlikely(result == nullptr)) return kAtomNil;
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_object_str(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -1002,7 +1010,43 @@ static ERL_NIF_TERM pythonx_py_object_str(ErlNifEnv *env, int argc, const ERL_NI
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyObject_Str(res->val);
-    if (unlikely(result == nullptr)) return kAtomNil;
+    return pyobject_to_nifres_or_pyerr(env, result);
+}
+
+static ERL_NIF_TERM pythonx_py_object_bytes(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyObject_Bytes(res->val);
+    return pyobject_to_nifres_or_pyerr(env, result);
+}
+
+static ERL_NIF_TERM pythonx_py_tuple_check(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyTuple_Check(res->val);
+    if (result) return kAtomTrue;
+    return kAtomFalse;
+}
+
+static ERL_NIF_TERM pythonx_py_tuple_check_exact(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyTuple_CheckExact(res->val);
+    if (result) return kAtomTrue;
+    return kAtomFalse;
+}
+
+static ERL_NIF_TERM pythonx_py_tuple_new(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    int64_t len;
+    if (!erlang::nif::get(env, argv[0], &len)) {
+        return enif_make_badarg(env);
+    }
+
+    PyObject *result = PyTuple_New(len);
+    if (unlikely(result == nullptr)) return pythonx_current_pyerr(env);
 
     PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
     if (unlikely(result_res == nullptr)) {
@@ -1016,12 +1060,47 @@ static ERL_NIF_TERM pythonx_py_object_str(ErlNifEnv *env, int argc, const ERL_NI
     return ret;
 }
 
-static ERL_NIF_TERM pythonx_py_object_bytes(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM pythonx_py_tuple_size(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
-    PyObject *result = PyObject_Bytes(res->val);
-    if (unlikely(result == nullptr)) return kAtomNil;
+    Py_ssize_t size = PyTuple_Size(res->val);
+    if (size == -1) return pythonx_current_pyerr(env);
+    return enif_make_int64(env, size);
+}
+
+static ERL_NIF_TERM pythonx_py_tuple_get_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int64_t pos;
+    if (!erlang::nif::get(env, argv[1], &pos)) return enif_make_badarg(env);
+
+    PyObject * result = PyTuple_GetItem(res->val, pos);
+    if (unlikely(result == nullptr)) return pythonx_current_pyerr(env);
+
+    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
+    if (unlikely(result_res == nullptr)) {
+        Py_DECREF(result);
+        return kAtomError;
+    }
+
+    result_res->val = result;
+    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
+    enif_release_resource(result_res);
+    return ret;
+}
+
+static ERL_NIF_TERM pythonx_py_tuple_get_slice(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int64_t low, high;
+    if (!erlang::nif::get(env, argv[1], &low)) return enif_make_badarg(env);
+    if (!erlang::nif::get(env, argv[2], &high)) return enif_make_badarg(env);
+
+    PyObject * result = PyTuple_GetSlice(res->val, low, high);
+    if (unlikely(result == nullptr)) return pythonx_current_pyerr(env);
 
     PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
     if (unlikely(result_res == nullptr)) {
@@ -1120,6 +1199,11 @@ static ErlNifFunc nif_functions[] = {
     {"py_list_set_item", 3, pythonx_py_list_set_item, 0},
     {"py_list_insert", 3, pythonx_py_list_insert, 0},
     {"py_list_append", 2, pythonx_py_list_append, 0},
+    {"py_list_get_slice", 3, pythonx_py_list_get_slice, 0},
+    {"py_list_set_slice", 4, pythonx_py_list_set_slice, 0},
+    {"py_list_sort", 1, pythonx_py_list_sort, 0},
+    {"py_list_reverse", 1, pythonx_py_list_reverse, 0},
+    {"py_list_as_tuple", 1, pythonx_py_list_as_tuple, 0},
 
     {"py_object_has_attr", 2, pythonx_py_object_has_attr, 0},
     {"py_object_has_attr_string", 2, pythonx_py_object_has_attr_string, 0},
@@ -1139,6 +1223,14 @@ static ErlNifFunc nif_functions[] = {
     {"py_object_ascii", 1, pythonx_py_object_ascii, 0},
     {"py_object_str", 1, pythonx_py_object_str, 0},
     {"py_object_bytes", 1, pythonx_py_object_bytes, 0},
+
+    {"py_tuple_check", 1, pythonx_py_tuple_check, 0},
+    {"py_tuple_check_exact", 1, pythonx_py_tuple_check_exact, 0},
+    {"py_tuple_new", 1, pythonx_py_tuple_new, 0},
+    {"py_tuple_size", 1, pythonx_py_tuple_size, 0},
+    {"py_tuple_get_item", 2, pythonx_py_tuple_get_item, 0},
+    {"py_tuple_get_slice", 3, pythonx_py_tuple_get_slice, 0},
+    // {"py_tuple_set_item", 3, pythonx_py_tuple_set_item, 0},
 
     {"py_unicode_from_string", 1, pythonx_py_unicode_from_string, 0},
     {"py_unicode_as_utf8", 1, pythonx_py_unicode_as_utf8, 0}

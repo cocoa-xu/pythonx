@@ -80,9 +80,10 @@ defmodule Pythonx.Nif do
               [arch, os, abi]
 
             1 ->
-              with ["win32"] <- target do
-                ["x86_64", "windows", "msvc"]
-              else
+              case target do
+                ["win32"] ->
+                  ["x86_64", "windows", "msvc"]
+
                 [unknown_target] ->
                   [unknown_target, "unknown", nil]
               end
@@ -292,6 +293,11 @@ defmodule Pythonx.Nif do
   def py_list_set_item(_list, _index, _item), do: :erlang.nif_error(:not_loaded)
   def py_list_insert(_list, _index, _item), do: :erlang.nif_error(:not_loaded)
   def py_list_append(_list, _item), do: :erlang.nif_error(:not_loaded)
+  def py_list_get_slice(_list, _low, _high), do: :erlang.nif_error(:not_loaded)
+  def py_list_set_slice(_list, _low, _high, _itemlist), do: :erlang.nif_error(:not_loaded)
+  def py_list_sort(_list), do: :erlang.nif_error(:not_loaded)
+  def py_list_reverse(_list), do: :erlang.nif_error(:not_loaded)
+  def py_list_as_tuple(_list), do: :erlang.nif_error(:not_loaded)
 
   def py_object_has_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
   def py_object_has_attr_string(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
@@ -311,6 +317,14 @@ defmodule Pythonx.Nif do
   def py_object_ascii(_ref), do: :erlang.nif_error(:not_loaded)
   def py_object_str(_ref), do: :erlang.nif_error(:not_loaded)
   def py_object_bytes(_ref), do: :erlang.nif_error(:not_loaded)
+
+  def py_tuple_check(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_tuple_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_tuple_new(_len), do: :erlang.nif_error(:not_loaded)
+  def py_tuple_size(_p), do: :erlang.nif_error(:not_loaded)
+  def py_tuple_get_item(_p, _pos), do: :erlang.nif_error(:not_loaded)
+  def py_tuple_get_slice(_p, _low, _high), do: :erlang.nif_error(:not_loaded)
+  # def py_tuple_set_item(_p, _pos, _o), do: :erlang.nif_error(:not_loaded)
 
   def py_unicode_from_string(_string), do: :erlang.nif_error(:not_loaded)
   def py_unicode_as_utf8(_ref), do: :erlang.nif_error(:not_loaded)

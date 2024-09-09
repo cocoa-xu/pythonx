@@ -1,6 +1,7 @@
 defmodule Pythonx.C.PyObject.Test do
   use ExUnit.Case, async: false
 
+  alias Pythonx.C.PyErr
   alias Pythonx.C.PyObject
   alias Pythonx.C.PyUnicode
 
@@ -119,7 +120,7 @@ defmodule Pythonx.C.PyObject.Test do
         |> PyObject.type()
         |> PyObject.generic_get_attr(PyUnicode.from_string("foo"))
 
-      assert nil == type_name
+      assert %PyErr{} = type_name
     end
   end
 
