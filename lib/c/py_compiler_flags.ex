@@ -7,7 +7,7 @@ defmodule Pythonx.C.PyCompilerFlags do
 
   defstruct [
     :cf_flags,
-    :cf_feature_version,
+    :cf_feature_version
   ]
 
   @doc """
@@ -17,7 +17,7 @@ defmodule Pythonx.C.PyCompilerFlags do
   def new do
     %__MODULE__{
       cf_flags: 0,
-      cf_feature_version: 8,
+      cf_feature_version: 8
     }
   end
 
@@ -28,7 +28,7 @@ defmodule Pythonx.C.PyCompilerFlags do
   def new(cf_flags, cf_feature_version) do
     %__MODULE__{
       cf_flags: cf_flags,
-      cf_feature_version: cf_feature_version,
+      cf_feature_version: cf_feature_version
     }
   end
 end

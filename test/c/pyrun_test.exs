@@ -11,8 +11,21 @@ defmodule Pythonx.C.PyRun.Test do
     Pythonx.initialize_once()
   end
 
+  describe "simple_string/1" do
+    test "returns 0 when succeeded" do
+      return = PyRun.simple_string("a = 1 + 2")
+      assert is_integer(return)
+      assert 0 == return
+    end
+
+    test "returns non-zero when failed" do
+      return = PyRun.simple_string("a = b + 2")
+      assert is_integer(return)
+      assert -1 == return
+    end
+  end
+
   test "string/4" do
-    Pythonx.initialize_once()
     globals = PyDict.new()
     locals = PyDict.new()
     a = PyLong.from_long(1)
