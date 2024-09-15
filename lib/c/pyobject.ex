@@ -46,6 +46,57 @@ defmodule Pythonx.C.PyObject do
   def decref(ref), do: Pythonx.Nif.py_decref(ref)
 
   @doc """
+  Print an object o.
+
+  Returns -1 on error.
+
+  The `flags` argument is used to enable certain printing options.
+
+  The only option currently supported is `Pythonx.py_print_raw`;
+  if given, the `str()` of the object is written instead of the `repr()`.
+  """
+  @spec print(PyObject.t()) :: String.t() | PyErr.t()
+  def print(o), do: print(o, 0)
+
+  @doc """
+  Print an object o.
+
+  Returns -1 on error.
+
+  The `flags` argument is used to enable certain printing options.
+
+  The only option currently supported is `Pythonx.py_print_raw`;
+  if given, the `str()` of the object is written instead of the `repr()`.
+  """
+  @spec print(PyObject.t(), integer()) :: String.t() | PyErr.t()
+  def print(o, flags), do: Pythonx.Nif.py_object_print(o, flags)
+
+  @doc """
+  Print an object o, on file `fp`.
+
+  Returns -1 on error.
+
+  The `flags` argument is used to enable certain printing options.
+
+  The only option currently supported is `Pythonx.py_print_raw`;
+  if given, the `str()` of the object is written instead of the `repr()`.
+  """
+  @spec print(PyObject.t(), :stdout | :stderr | IO.t(), integer()) :: String.t() | PyErr.t()
+  def print(o, fp, flags) do
+    ret = Pythonx.Nif.py_object_print(o, flags)
+
+    if is_binary(ret) do
+      case fp do
+        :stdout -> IO.puts(ret)
+        :stderr -> IO.puts(:stderr, ret)
+        _ -> IO.write(fp, ret)
+      end
+    else
+      ret
+    end
+  end
+
+  @doc """
   Returns true if o has the attribute attr_name, and false otherwise.
 
   This is equivalent to the Python expression hasattr(o, attr_name). This function always succeeds.

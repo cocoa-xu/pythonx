@@ -1,4 +1,3 @@
-
 defmodule Pythonx.C.PyFloat.Test do
   use ExUnit.Case, async: false
 

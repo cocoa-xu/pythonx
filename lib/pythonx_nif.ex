@@ -359,6 +359,7 @@ defmodule Pythonx.Nif do
   def py_long_as_double(_ref), do: :erlang.nif_error(:not_loaded)
   def py_long_get_info, do: :erlang.nif_error(:not_loaded)
 
+  def py_object_print(_ref, _flags), do: :erlang.nif_error(:not_loaded)
   def py_object_has_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
   def py_object_has_attr_string(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
   def py_object_get_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
@@ -392,6 +393,7 @@ defmodule Pythonx.Nif do
   def py_run_simple_string(_command), do: :erlang.nif_error(:not_loaded)
   def py_run_string(_str, _start, _globals, _locals), do: :erlang.nif_error(:not_loaded)
 
+  def py_print_raw, do: :erlang.nif_error(:not_loaded)
   def py_eval_input, do: :erlang.nif_error(:not_loaded)
   def py_file_input, do: :erlang.nif_error(:not_loaded)
   def py_single_input, do: :erlang.nif_error(:not_loaded)

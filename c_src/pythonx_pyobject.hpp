@@ -5,10 +5,38 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <erl_nif.h>
+#include <stdio.h>
 #include "nif_utils.hpp"
 #include "pythonx_consts.hpp"
 #include "pythonx_utils.hpp"
 #include "pythonx_pyerr.hpp"
+
+static ERL_NIF_TERM pythonx_py_object_print(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    int flags = 0;
+    if (!erlang::nif::get(env, argv[1], &flags)) return enif_make_badarg(env);
+
+    char *buffer;
+    size_t size;
+    FILE *file = open_memstream(&buffer, &size);
+    if (unlikely(file == nullptr)) return kAtomError;
+
+    int result = PyObject_Print(res->val, file, flags);
+    fflush(file);
+    fclose(file);
+    
+    if (result == 1) {
+        free(buffer);
+        return pythonx_current_pyerr(env);
+    }
+
+    std::optional<ERL_NIF_TERM> bin_term = erlang::nif::make_binary(env, buffer, size);
+    free(buffer);
+    if (!bin_term) return kAtomError;
+    return bin_term.value();
+}
 
 static ERL_NIF_TERM pythonx_py_object_has_attr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);

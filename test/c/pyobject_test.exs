@@ -53,6 +53,24 @@ defmodule Pythonx.C.PyObject.Test do
     assert is_reference(py_none)
   end
 
+  describe "print" do
+    test "print/1" do
+      assert "None" == PyObject.print(PyObject.py_none())
+      assert "True" == PyObject.print(PyObject.py_true())
+      assert "False" == PyObject.print(PyObject.py_false())
+    end
+
+    test "print/3" do
+      assert ExUnit.CaptureIO.capture_io(fn ->
+        PyObject.print(PyObject.py_none(), :stdout, 0)
+      end) == "None\n"
+
+      assert ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        PyObject.print(PyObject.py_true(), :stderr, 0)
+      end) == "True\n"
+    end
+  end
+
   describe "attr" do
     test "has_attr/2" do
       obj_type = PyObject.type(PyObject.py_none())

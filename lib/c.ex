@@ -2,6 +2,14 @@ defmodule Pythonx.C do
   @moduledoc false
 
   @doc """
+  Flag to be used with multiple functions that print the object (like `PyObject.print/1` and `PyFile.write_object`).
+
+  If passed, these function would use the `str()` of the object instead of the `repr()`.
+  """
+  @spec py_print_raw :: integer()
+  def py_print_raw, do: Pythonx.Nif.py_print_raw()
+
+  @doc """
   The start symbol from the Python grammar for isolated expressions; for use with Py_CompileString().
   """
   @spec py_eval_input :: integer()

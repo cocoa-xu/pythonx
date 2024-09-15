@@ -508,6 +508,10 @@ static ERL_NIF_TERM pythonx_py_decref(ErlNifEnv *env, int argc, const ERL_NIF_TE
     return ref;
 }
 
+static ERL_NIF_TERM pythonx_py_print_raw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    return erlang::nif::make(env, Py_PRINT_RAW);
+}
+
 static ERL_NIF_TERM pythonx_py_eval_input(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return erlang::nif::make(env, Py_eval_input);
 }
@@ -628,6 +632,7 @@ static ErlNifFunc nif_functions[] = {
     {"py_long_as_double", 1, pythonx_py_long_as_double, 0},
     {"py_long_get_info", 0, pythonx_py_long_get_info, 0},
 
+    {"py_object_print", 2, pythonx_py_object_print, 0},
     {"py_object_has_attr", 2, pythonx_py_object_has_attr, 0},
     {"py_object_has_attr_string", 2, pythonx_py_object_has_attr_string, 0},
     {"py_object_get_attr", 2, pythonx_py_object_get_attr, 0},
@@ -661,6 +666,7 @@ static ErlNifFunc nif_functions[] = {
     {"py_run_simple_string", 1, pythonx_py_run_simple_string, 0},
     {"py_run_string", 4, pythonx_py_run_string, 0},
 
+    {"py_print_raw", 0, pythonx_py_print_raw, 0},
     {"py_eval_input", 0, pythonx_py_eval_input, 0},
     {"py_file_input", 0, pythonx_py_file_input, 0},
     {"py_single_input", 0, pythonx_py_single_input, 0},

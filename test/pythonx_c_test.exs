@@ -6,6 +6,10 @@ defmodule Pythonx.C.Test do
   end
 
   test "py_eval_input/0" do
+    assert is_integer(Pythonx.C.py_print_raw())
+  end
+
+  test "py_eval_input/0" do
     assert is_integer(Pythonx.C.py_eval_input())
   end
 
