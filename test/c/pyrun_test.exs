@@ -22,6 +22,6 @@ defmodule Pythonx.C.PyRun.Test do
     PyRun.string("c = a + b", C.py_file_input(), globals, locals)
     c = PyUnicode.from_string("c")
     val_c = PyDict.get_item_with_error(locals, c)
-    PyLong.as_long(val_c)
+    assert 3 == PyLong.as_long(val_c)
   end
 end
