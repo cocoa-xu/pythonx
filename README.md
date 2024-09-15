@@ -14,8 +14,6 @@ Python Interpreter in Elixir
 iex> alias Pythonx.C
 iex> alias Pythonx.C.PyDict
 iex> alias Pythonx.C.PyLong
-iex> alias Pythonx.C.PyList
-iex> alias Pythonx.C.PyObject
 iex> alias Pythonx.C.PyRun
 iex> alias Pythonx.C.PyUnicode
 iex> Pythonx.initialize_once()

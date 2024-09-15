@@ -648,6 +648,7 @@ static ErlNifFunc nif_functions[] = {
     {"py_unicode_from_string", 1, pythonx_py_unicode_from_string, 0},
     {"py_unicode_as_utf8", 1, pythonx_py_unicode_as_utf8, 0},
 
+    {"py_run_simple_string", 1, pythonx_py_run_simple_string, 0},
     {"py_run_string", 4, pythonx_py_run_string, 0},
 
     {"py_eval_input", 0, pythonx_py_eval_input, 0},

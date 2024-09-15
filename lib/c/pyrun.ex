@@ -7,6 +7,24 @@ defmodule Pythonx.C.PyRun do
   The available start symbols are `py_eval_input`, `py_file_input`, and `py_single_input`. These are described following the functions which accept them as parameters.
   """
 
+  # alias Pythonx.C.PyCompilerFlags
+
+  @doc """
+  This is a simplified interface to `PyRun.simple_string_flags/2` below, leaving the flags argument set to `nil`.
+  """
+  @spec simple_string(String.t()) :: integer()
+  def simple_string(command) do
+    Pythonx.Nif.py_run_simple_string(command)
+  end
+
+  # @doc """
+  # This is a simplified interface to `PyRun.simple_string_flags/2` below, leaving the flags argument set to `nil`.
+  # """
+  # @spec simple_string_flags(command :: String.t(), flags :: PyCompilerFlags.t()) :: integer()
+  # def simple_string_flags(command, flags) do
+  #   Pythonx.Nif.py_run_simple_string(command, flags)
+  # end
+
   @doc """
   This is a simplified interface to `PyRun.string_flags/5` below, leaving flags set to `nil`.
 

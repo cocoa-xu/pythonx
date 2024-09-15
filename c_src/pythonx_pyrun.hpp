@@ -10,6 +10,14 @@
 #include "pythonx_utils.hpp"
 #include "pythonx_pyerr.hpp"
 
+static ERL_NIF_TERM pythonx_py_run_simple_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    std::string command;
+    if (!erlang::nif::get(env, argv[0], command)) return enif_make_badarg(env);
+
+    int result = PyRun_SimpleString(command.c_str());
+    return enif_make_int(env, result);
+}
+
 static ERL_NIF_TERM pythonx_py_run_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     std::string str;
     if (!erlang::nif::get(env, argv[0], str)) return enif_make_badarg(env);
