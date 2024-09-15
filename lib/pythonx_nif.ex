@@ -285,6 +285,10 @@ defmodule Pythonx.Nif do
   def py_incref(_ref), do: :erlang.nif_error(:not_loaded)
   def py_decref(_ref), do: :erlang.nif_error(:not_loaded)
 
+  def py_dict_check(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_dict_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_dict_new(), do: :erlang.nif_error(:not_loaded)
+
   def py_list_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_new(_len), do: :erlang.nif_error(:not_loaded)
