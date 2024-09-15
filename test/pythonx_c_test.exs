@@ -5,7 +5,7 @@ defmodule Pythonx.C.Test do
     Pythonx.initialize_once()
   end
 
-  test "py_eval_input/0" do
+  test "py_print_raw/0" do
     assert is_integer(Pythonx.C.py_print_raw())
   end
 
