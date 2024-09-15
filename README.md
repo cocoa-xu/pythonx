@@ -12,21 +12,13 @@ Python Interpreter in Elixir
 
 ```elixir
 iex> alias Pythonx.C
-Pythonx.C
 iex> alias Pythonx.C.PyDict
-Pythonx.C.PyDict
 iex> alias Pythonx.C.PyLong
-Pythonx.C.PyLong
 iex> alias Pythonx.C.PyList
-Pythonx.C.PyList
 iex> alias Pythonx.C.PyObject
-Pythonx.C.PyObject
 iex> alias Pythonx.C.PyRun
-Pythonx.C.PyRun
 iex> alias Pythonx.C.PyUnicode
-Pythonx.C.PyUnicode
 iex> Pythonx.initialize_once()
-:ok
 iex> globals = PyDict.new()
 #Reference<0.1798353731.1418330114.239105>
 iex> locals = PyDict.new()
