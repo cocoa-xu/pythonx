@@ -313,6 +313,15 @@ defmodule Pythonx.Nif do
   def py_eval_get_func_name(_func), do: :erlang.nif_error(:not_loaded)
   def py_eval_get_func_desc(_func), do: :erlang.nif_error(:not_loaded)
 
+  def py_float_check(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_float_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_float_from_string(_str), do: :erlang.nif_error(:not_loaded)
+  def py_float_from_double(_v), do: :erlang.nif_error(:not_loaded)
+  def py_float_as_double(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_float_get_info, do: :erlang.nif_error(:not_loaded)
+  def py_float_get_max, do: :erlang.nif_error(:not_loaded)
+  def py_float_get_min, do: :erlang.nif_error(:not_loaded)
+
   def py_list_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_new(_len), do: :erlang.nif_error(:not_loaded)

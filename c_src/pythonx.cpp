@@ -13,6 +13,7 @@
 #include "pythonx_pyerr.hpp"
 #include "pythonx_pydict.hpp"
 #include "pythonx_pyeval.hpp"
+#include "pythonx_pyfloat.hpp"
 #include "pythonx_pylist.hpp"
 #include "pythonx_pylong.hpp"
 #include "pythonx_pyobject.hpp"
@@ -580,6 +581,15 @@ static ErlNifFunc nif_functions[] = {
     {"py_eval_get_globals", 0, pythonx_py_eval_get_globals, 0},
     {"py_eval_get_func_name", 1, pythonx_py_eval_get_func_name, 0},
     {"py_eval_get_func_desc", 1, pythonx_py_eval_get_func_desc, 0},
+
+    {"py_float_check", 1, pythonx_py_float_check, 0},
+    {"py_float_check_exact", 1, pythonx_py_float_check_exact, 0},
+    {"py_float_from_string", 1, pythonx_py_float_from_string, 0},
+    {"py_float_from_double", 1, pythonx_py_float_from_double, 0},
+    {"py_float_as_double", 1, pythonx_py_float_as_double, 0},
+    {"py_float_get_info", 0, pythonx_py_float_get_info, 0},
+    {"py_float_get_max", 0, pythonx_py_float_get_max, 0},
+    {"py_float_get_min", 0, pythonx_py_float_get_min, 0},
 
     {"py_list_check", 1, pythonx_py_list_check, 0},
     {"py_list_check_exact", 1, pythonx_py_list_check_exact, 0},
