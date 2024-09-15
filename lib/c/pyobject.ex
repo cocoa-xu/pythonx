@@ -81,7 +81,7 @@ defmodule Pythonx.C.PyObject do
   The only option currently supported is `Pythonx.py_print_raw`;
   if given, the `str()` of the object is written instead of the `repr()`.
   """
-  @spec print(PyObject.t(), :stdout | :stderr | IO.t(), integer()) :: String.t() | PyErr.t()
+  @spec print(PyObject.t(), :stdout | :stderr | IO.device(), integer()) :: String.t() | PyErr.t()
   def print(o, fp, flags) do
     ret = Pythonx.Nif.py_object_print(o, flags)
 
