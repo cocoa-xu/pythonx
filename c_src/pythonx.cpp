@@ -12,6 +12,7 @@
 #include "pyobject_nif_res.hpp"
 #include "pythonx_pyerr.hpp"
 #include "pythonx_pydict.hpp"
+#include "pythonx_pyeval.hpp"
 #include "pythonx_pylist.hpp"
 #include "pythonx_pylong.hpp"
 #include "pythonx_pyobject.hpp"
@@ -560,6 +561,12 @@ static ErlNifFunc nif_functions[] = {
     {"py_dict_merge", 3, pythonx_py_dict_merge, 0},
     {"py_dict_update", 2, pythonx_py_dict_update, 0},
     {"py_dict_merge_from_seq2", 3, pythonx_py_dict_merge_from_seq2, 0},
+
+    {"py_eval_get_builtins", 0, pythonx_py_eval_get_builtins, 0},
+    {"py_eval_get_locals", 0, pythonx_py_eval_get_locals, 0},
+    {"py_eval_get_globals", 0, pythonx_py_eval_get_globals, 0},
+    {"py_eval_get_func_name", 1, pythonx_py_eval_get_func_name, 0},
+    {"py_eval_get_func_desc", 1, pythonx_py_eval_get_func_desc, 0},
 
     {"py_list_check", 1, pythonx_py_list_check, 0},
     {"py_list_check_exact", 1, pythonx_py_list_check_exact, 0},

@@ -307,6 +307,12 @@ defmodule Pythonx.Nif do
   def py_dict_update(_ref, _b), do: :erlang.nif_error(:not_loaded)
   def py_dict_merge_from_seq2(_ref, _seq2, _override), do: :erlang.nif_error(:not_loaded)
 
+  def py_eval_get_builtins, do: :erlang.nif_error(:not_loaded)
+  def py_eval_get_locals, do: :erlang.nif_error(:not_loaded)
+  def py_eval_get_globals, do: :erlang.nif_error(:not_loaded)
+  def py_eval_get_func_name(_func), do: :erlang.nif_error(:not_loaded)
+  def py_eval_get_func_desc(_func), do: :erlang.nif_error(:not_loaded)
+
   def py_list_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_new(_len), do: :erlang.nif_error(:not_loaded)
@@ -342,7 +348,7 @@ defmodule Pythonx.Nif do
   def py_long_as_unsigned_long_mask(_ref), do: :erlang.nif_error(:not_loaded)
   def py_long_as_unsigned_long_long_mask(_ref), do: :erlang.nif_error(:not_loaded)
   def py_long_as_double(_ref), do: :erlang.nif_error(:not_loaded)
-  def py_long_get_info(), do: :erlang.nif_error(:not_loaded)
+  def py_long_get_info, do: :erlang.nif_error(:not_loaded)
 
   def py_object_has_attr(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)
   def py_object_has_attr_string(_ref, _attr_name), do: :erlang.nif_error(:not_loaded)

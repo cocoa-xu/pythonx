@@ -237,5 +237,5 @@ defmodule Pythonx.C.PyLong do
   """
   @doc stable_api: true
   @spec get_info() :: PyObject.t() | PyErr.t()
-  def get_info(), do: Pythonx.Nif.py_long_get_info()
+  def get_info, do: Pythonx.Nif.py_long_get_info()
 end
