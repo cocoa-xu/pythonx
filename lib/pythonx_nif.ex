@@ -288,6 +288,8 @@ defmodule Pythonx.Nif do
   def py_dict_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_dict_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
   def py_dict_new(), do: :erlang.nif_error(:not_loaded)
+  def py_dict_set_item(_ref, _key, _val), do: :erlang.nif_error(:not_loaded)
+  def py_dict_set_item_string(_ref, _key, _val), do: :erlang.nif_error(:not_loaded)
 
   def py_list_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_check_exact(_ref), do: :erlang.nif_error(:not_loaded)

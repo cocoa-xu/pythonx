@@ -541,6 +541,8 @@ static ErlNifFunc nif_functions[] = {
     {"py_dict_check", 1, pythonx_py_dict_check, 0},
     {"py_dict_check_exact", 1, pythonx_py_dict_check_exact, 0},
     {"py_dict_new", 0, pythonx_py_dict_new, 0},
+    {"py_dict_set_item", 3, pythonx_py_dict_set_item, 0},
+    {"py_dict_set_item_string", 3, pythonx_py_dict_set_item_string, 0},
 
     {"py_list_check", 1, pythonx_py_list_check, 0},
     {"py_list_check_exact", 1, pythonx_py_list_check_exact, 0},

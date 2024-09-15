@@ -58,25 +58,25 @@ defmodule Pythonx.C.PyDict do
   # @spec copy(PyObject.t()) :: PyObject.t() | PyErr.t()
   # def copy(p) when is_reference(p), do: Pythonx.Nif.py_dict_copy(p)
 
-  # @doc """
-  # Insert `val` into the dictionary `p` with a key of `key`.
+  @doc """
+  Insert `val` into the dictionary `p` with a key of `key`.
 
-  # `key` must be hashable; if it isn’t, `PyErr.t()` with `TypeError` will be returned.
+  `key` must be hashable; if it isn’t, `PyErr.t()` with `TypeError` will be returned.
 
-  # Return `:ok` on success or `PyErr.t()` on failure.
+  Return `:ok` on success or `PyErr.t()` on failure.
 
-  # This function does not steal a reference to `val`.
-  # """
-  # @doc stable_api: true
-  # @spec set_item(PyObject.t(), PyObject.t(), PyObject.t()) :: :ok | PyErr.t()
-  # def set_item(p, key, val) when is_reference(p) and is_reference(key) and is_reference(val), do: Pythonx.Nif.py_dict_set_item(p, key, val)
+  This function does not steal a reference to `val`.
+  """
+  @doc stable_api: true
+  @spec set_item(PyObject.t(), PyObject.t(), PyObject.t()) :: :ok | PyErr.t()
+  def set_item(p, key, val) when is_reference(p) and is_reference(key) and is_reference(val), do: Pythonx.Nif.py_dict_set_item(p, key, val)
 
-  # @doc """
-  # This is the same as `PyDict.set_item/3`, but `key` is specified as a UTF-8 encoded binary string, rather than a `PyObject*`.
-  # """
-  # @doc stable_api: true
-  # @spec set_item_string(PyObject.t(), String.t(), PyObject.t()) :: :ok | PyErr.t()
-  # def set_item_string(p, key, val) when is_reference(p) and is_binary(key) and is_reference(val), do: Pythonx.Nif.py_dict_set_item_string(p, key, val)
+  @doc """
+  This is the same as `PyDict.set_item/3`, but `key` is specified as a UTF-8 encoded binary string, rather than a `PyObject*`.
+  """
+  @doc stable_api: true
+  @spec set_item_string(PyObject.t(), String.t(), PyObject.t()) :: :ok | PyErr.t()
+  def set_item_string(p, key, val) when is_reference(p) and is_binary(key) and is_reference(val), do: Pythonx.Nif.py_dict_set_item_string(p, key, val)
 
   # @doc """
   # Remove the entry in dictionary `p` with key `key`.
