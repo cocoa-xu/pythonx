@@ -8,7 +8,48 @@ Python Interpreter in Elixir
 > Pythonx is still very much a work in progress and is mainly intended for some proof of concept at current stage. 
 
 ## Proof of Concept
+### Low-Level
 
+```elixir
+iex> alias Pythonx.C
+Pythonx.C
+iex> alias Pythonx.C.PyDict
+Pythonx.C.PyDict
+iex> alias Pythonx.C.PyLong
+Pythonx.C.PyLong
+iex> alias Pythonx.C.PyList
+Pythonx.C.PyList
+iex> alias Pythonx.C.PyObject
+Pythonx.C.PyObject
+iex> alias Pythonx.C.PyRun
+Pythonx.C.PyRun
+iex> alias Pythonx.C.PyUnicode
+Pythonx.C.PyUnicode
+iex> Pythonx.initialize_once()
+:ok
+iex> globals = PyDict.new()
+#Reference<0.1798353731.1418330114.239105>
+iex> locals = PyDict.new()
+#Reference<0.1798353731.1418330114.239123>
+iex> a = PyLong.from_long(1)
+#Reference<0.1798353731.1418330114.239141>
+iex> b = PyLong.from_long(2)
+#Reference<0.1798353731.1418330114.239155>
+iex> PyDict.set_item_string(locals, "a", a)
+true
+iex> PyDict.set_item_string(locals, "b", b)
+true
+iex> PyRun.string("c = a + b", C.py_file_input(), globals, locals)
+#Reference<0.1798353731.1418330117.241204>
+iex> c = PyUnicode.from_string("c")
+#Reference<0.1798353731.1418330117.241222>
+iex> val_c = PyDict.get_item_with_error(locals, c)
+#Reference<0.1798353731.1418330117.241236>
+iex> PyLong.as_long(val_c)
+3
+```
+
+### Very High Level
 #### Python Code Evaluation
 ```elixir
 defmodule MyModule do
