@@ -61,18 +61,18 @@ static ERL_NIF_TERM pythonx_py_long_from_size_t(ErlNifEnv *env, int argc, const 
 }
 
 static ERL_NIF_TERM pythonx_py_long_from_long_long(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    long long val;
-    if (!erlang::nif::get(env, argv[0], &val)) return enif_make_badarg(env);
+    int64_t i64;
+    if (!erlang::nif::get(env, argv[0], &i64)) return enif_make_badarg(env);
 
-    PyObject *result = PyLong_FromLongLong(val);
+    PyObject *result = PyLong_FromLongLong((long long)i64);
     return pyobject_to_nifres_or_nil(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_long_from_unsigned_long_long(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    unsigned long long val;
+    uint64_t val;
     if (!erlang::nif::get(env, argv[0], &val)) return enif_make_badarg(env);
 
-    PyObject *result = PyLong_FromUnsignedLongLong(val);
+    PyObject *result = PyLong_FromUnsignedLongLong((unsigned long long)val);
     return pyobject_to_nifres_or_nil(env, result);
 }
 

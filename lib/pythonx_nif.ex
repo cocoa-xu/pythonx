@@ -379,4 +379,10 @@ defmodule Pythonx.Nif do
 
   def py_unicode_from_string(_string), do: :erlang.nif_error(:not_loaded)
   def py_unicode_as_utf8(_ref), do: :erlang.nif_error(:not_loaded)
+
+  def py_run_string(_str, _start, _globals, _locals), do: :erlang.nif_error(:not_loaded)
+
+  def py_eval_input, do: :erlang.nif_error(:not_loaded)
+  def py_file_input, do: :erlang.nif_error(:not_loaded)
+  def py_single_input, do: :erlang.nif_error(:not_loaded)
 end

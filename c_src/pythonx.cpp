@@ -16,6 +16,7 @@
 #include "pythonx_pylist.hpp"
 #include "pythonx_pylong.hpp"
 #include "pythonx_pyobject.hpp"
+#include "pythonx_pyrun.hpp"
 #include "pythonx_pytuple.hpp"
 #include "pythonx_pyunicode.hpp"
 
@@ -506,6 +507,18 @@ static ERL_NIF_TERM pythonx_py_decref(ErlNifEnv *env, int argc, const ERL_NIF_TE
     return ref;
 }
 
+static ERL_NIF_TERM pythonx_py_eval_input(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    return erlang::nif::make(env, Py_eval_input);
+}
+
+static ERL_NIF_TERM pythonx_py_file_input(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    return erlang::nif::make(env, Py_file_input);
+}
+
+static ERL_NIF_TERM pythonx_py_single_input(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    return erlang::nif::make(env, Py_single_input);
+}
+
 static int on_load(ErlNifEnv *env, void **_sth1, ERL_NIF_TERM _sth2) {
     init_pythonx_consts(env);
 
@@ -633,7 +646,13 @@ static ErlNifFunc nif_functions[] = {
     // {"py_tuple_set_item", 3, pythonx_py_tuple_set_item, 0},
 
     {"py_unicode_from_string", 1, pythonx_py_unicode_from_string, 0},
-    {"py_unicode_as_utf8", 1, pythonx_py_unicode_as_utf8, 0}
+    {"py_unicode_as_utf8", 1, pythonx_py_unicode_as_utf8, 0},
+
+    {"py_run_string", 4, pythonx_py_run_string, 0},
+
+    {"py_eval_input", 0, pythonx_py_eval_input, 0},
+    {"py_file_input", 0, pythonx_py_file_input, 0},
+    {"py_single_input", 0, pythonx_py_single_input, 0},
 };
 
 ERL_NIF_INIT(Elixir.Pythonx.Nif, nif_functions, on_load, on_reload, on_upgrade, NULL);
