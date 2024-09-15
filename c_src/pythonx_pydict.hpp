@@ -33,6 +33,27 @@ static ERL_NIF_TERM pythonx_py_dict_new(ErlNifEnv *env, int argc, const ERL_NIF_
     return pyobject_to_nifres_or_pyerr(env, result);
 }
 
+static ERL_NIF_TERM pythonx_py_dict_clear(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyDict_Clear(res->val);
+    return kAtomOk;
+}
+
+static ERL_NIF_TERM pythonx_py_dict_contains(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(key_res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyDict_Contains(res->val, key_res->val);
+    if (result == -1) return pythonx_current_pyerr(env);
+    if (result) return kAtomTrue;
+    return kAtomFalse;
+}
+
 static ERL_NIF_TERM pythonx_py_dict_set_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     ERL_NIF_TERM ref = argv[0];
     PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
@@ -63,6 +84,105 @@ static ERL_NIF_TERM pythonx_py_dict_set_item_string(ErlNifEnv *env, int argc, co
     int result = PyDict_SetItemString(res->val, key.c_str(), val_res->val);
     if (result == -1) return pythonx_current_pyerr(env);
     return kAtomTrue;
+}
+
+static ERL_NIF_TERM pythonx_py_dict_del_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(key_res == nullptr)) return enif_make_badarg(env);
+
+    int result = PyDict_DelItem(res->val, key_res->val);
+    if (result == -1) return pythonx_current_pyerr(env);
+    return kAtomOk;
+}
+
+static ERL_NIF_TERM pythonx_py_dict_del_item_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    std::string key;
+    if (!erlang::nif::get(env, argv[1], key)) return enif_make_badarg(env);
+
+    int result = PyDict_DelItemString(res->val, key.c_str());
+    if (result == -1) return pythonx_current_pyerr(env);
+    return kAtomOk;
+}
+
+static ERL_NIF_TERM pythonx_py_dict_get_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(key_res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyDict_GetItem(res->val, key_res->val);
+    return pyobject_to_nifres_or_nil(env, result, true);
+}
+
+static ERL_NIF_TERM pythonx_py_dict_get_item_with_error(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
+    if (unlikely(key_res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyDict_GetItemWithError(res->val, key_res->val);
+    return pyobject_to_nifres_or_pyerr(env, result, true);
+}
+
+static ERL_NIF_TERM pythonx_py_dict_get_item_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    std::string key;
+    if (!erlang::nif::get(env, argv[1], key)) return enif_make_badarg(env);
+
+    PyObject *result = PyDict_GetItemString(res->val, key.c_str());
+    return pyobject_to_nifres_or_nil(env, result, true);
+}
+
+static ERL_NIF_TERM pythonx_py_dict_items(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyDict_Items(res->val);
+    return pyobject_to_nifres_or_pyerr(env, result);
+}
+
+static ERL_NIF_TERM pythonx_py_dict_keys(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyDict_Keys(res->val);
+    return pyobject_to_nifres_or_pyerr(env, result);
+}
+
+static ERL_NIF_TERM pythonx_py_dict_values(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    PyObject *result = PyDict_Values(res->val);
+    return pyobject_to_nifres_or_pyerr(env, result);
+}
+
+static ERL_NIF_TERM pythonx_py_dict_size(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref = argv[0];
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    if (unlikely(res == nullptr)) return enif_make_badarg(env);
+
+    Py_ssize_t size = PyDict_Size(res->val);
+    if (size == -1) return pythonx_current_pyerr(env);
+    return enif_make_int64(env, size);
 }
 
 #endif  // PYTHONX_PYDICT_HPP
