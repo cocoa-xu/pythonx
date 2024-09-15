@@ -35,18 +35,7 @@ static ERL_NIF_TERM pythonx_py_tuple_new(ErlNifEnv *env, int argc, const ERL_NIF
     }
 
     PyObject *result = PyTuple_New(len);
-    if (unlikely(result == nullptr)) return pythonx_current_pyerr(env);
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result);
 }
 
 static ERL_NIF_TERM pythonx_py_tuple_size(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -66,18 +55,7 @@ static ERL_NIF_TERM pythonx_py_tuple_get_item(ErlNifEnv *env, int argc, const ER
     if (!erlang::nif::get(env, argv[1], &pos)) return enif_make_badarg(env);
 
     PyObject * result = PyTuple_GetItem(res->val, pos);
-    if (unlikely(result == nullptr)) return pythonx_current_pyerr(env);
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result, true);
 }
 
 static ERL_NIF_TERM pythonx_py_tuple_get_slice(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -89,18 +67,7 @@ static ERL_NIF_TERM pythonx_py_tuple_get_slice(ErlNifEnv *env, int argc, const E
     if (!erlang::nif::get(env, argv[2], &high)) return enif_make_badarg(env);
 
     PyObject * result = PyTuple_GetSlice(res->val, low, high);
-    if (unlikely(result == nullptr)) return pythonx_current_pyerr(env);
-
-    PyObjectNifRes *result_res = allocate_resource<PyObjectNifRes>();
-    if (unlikely(result_res == nullptr)) {
-        Py_DECREF(result);
-        return kAtomError;
-    }
-
-    result_res->val = result;
-    ERL_NIF_TERM ret = enif_make_resource(env, result_res);
-    enif_release_resource(result_res);
-    return ret;
+    return pyobject_to_nifres_or_pyerr(env, result);
 }
 
 #endif  // PYTHONX_PYTUPLE_HPP
