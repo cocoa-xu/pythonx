@@ -253,13 +253,13 @@ static std::optional<ERL_NIF_TERM> python_items_in_dict_to(ErlNifEnv *env, PyObj
 static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term) {
     if (enif_is_atom(env, term)) {
         if (enif_is_identical(term, kAtomNil)) {
-            return Py_None;
+            Py_RETURN_NONE;
         }
         if (enif_is_identical(term, kAtomTrue)) {
-            return Py_True;
+            Py_RETURN_TRUE;
         }
         if (enif_is_identical(term, kAtomFalse)) {
-            return Py_False;
+            Py_RETURN_FALSE;
         }
 
         std::string atom;
@@ -268,7 +268,7 @@ static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term
         } else {
             // todo: better error handling
             // return None if get_atom fails for now
-            return Py_None;
+            Py_RETURN_NONE;
         }
     } else if (enif_is_binary(env, term)) {
         ErlNifBinary binary;
@@ -276,7 +276,7 @@ static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term
             return PyUnicode_DecodeUTF8((const char *)binary.data, binary.size, "strict");
         } else {
             // todo: return None if enif_inspect_binary fails
-            return Py_None;
+            Py_RETURN_NONE;
         }
     } else if (enif_is_list(env, term)) {
         ERL_NIF_TERM head, tail;
@@ -288,7 +288,7 @@ static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term
                     list.emplace_back(item.value());
                 } else {
                     // todo: return None for unsupported types for now
-                    return Py_None;
+                    Py_RETURN_NONE;
                 }
                 term = tail;
             }
@@ -316,7 +316,7 @@ static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term
         } else {
             // todo: this should not happen
             // but if it does, return None for now
-            return Py_None;
+            Py_RETURN_NONE;
         }
     } else if (enif_is_number(env, term)) {
         ErlNifUInt64 u64;
@@ -333,11 +333,11 @@ static std::optional<PyObject *> erl_to_python(ErlNifEnv *env, ERL_NIF_TERM term
         }
 
         // todo: return None for unsupported types for now
-        return Py_None;
+        Py_RETURN_NONE;
     }
 
     // todo: return None for unsupported types for now
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 // ------- Python C API functions -------
