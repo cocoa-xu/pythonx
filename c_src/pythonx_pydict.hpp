@@ -208,4 +208,50 @@ static ERL_NIF_TERM pythonx_py_dict_size(ErlNifEnv *env, int argc, const ERL_NIF
     return enif_make_int64(env, size);
 }
 
+static ERL_NIF_TERM pythonx_py_dict_merge(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref1 = argv[0];
+    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, ref1);
+    if (unlikely(res1 == nullptr)) return enif_make_badarg(env);
+
+    ERL_NIF_TERM ref2 = argv[1];
+    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, ref2);
+    if (unlikely(res2 == nullptr)) return enif_make_badarg(env);
+
+    int override = enif_is_identical(argv[2], kAtomTrue) ? 1 : 0;
+
+    int result = PyDict_Merge(res1->val, res2->val, override);
+    if (result == -1) return pythonx_current_pyerr(env);
+    return kAtomOk;
+}
+
+static ERL_NIF_TERM pythonx_py_dict_update(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref1 = argv[0];
+    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, ref1);
+    if (unlikely(res1 == nullptr)) return enif_make_badarg(env);
+
+    ERL_NIF_TERM ref2 = argv[1];
+    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, ref2);
+    if (unlikely(res2 == nullptr)) return enif_make_badarg(env);
+
+    int result = PyDict_Update(res1->val, res2->val);
+    if (result == -1) return pythonx_current_pyerr(env);
+    return kAtomOk;
+}
+
+static ERL_NIF_TERM pythonx_py_dict_merge_from_seq2(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ERL_NIF_TERM ref1 = argv[0];
+    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, ref1);
+    if (unlikely(res1 == nullptr)) return enif_make_badarg(env);
+
+    ERL_NIF_TERM ref2 = argv[1];
+    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, ref2);
+    if (unlikely(res2 == nullptr)) return enif_make_badarg(env);
+
+    int override = enif_is_identical(argv[2], kAtomTrue) ? 1 : 0;
+
+    int result = PyDict_MergeFromSeq2(res1->val, res2->val, override);
+    if (result == -1) return pythonx_current_pyerr(env);
+    return kAtomOk;
+}
+
 #endif  // PYTHONX_PYDICT_HPP

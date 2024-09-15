@@ -556,6 +556,9 @@ static ErlNifFunc nif_functions[] = {
     {"py_dict_keys", 1, pythonx_py_dict_keys, 0},
     {"py_dict_values", 1, pythonx_py_dict_values, 0},
     {"py_dict_size", 1, pythonx_py_dict_size, 0},
+    {"py_dict_merge", 3, pythonx_py_dict_merge, 0},
+    {"py_dict_update", 2, pythonx_py_dict_update, 0},
+    {"py_dict_merge_from_seq2", 3, pythonx_py_dict_merge_from_seq2, 0},
 
     {"py_list_check", 1, pythonx_py_list_check, 0},
     {"py_list_check_exact", 1, pythonx_py_list_check_exact, 0},

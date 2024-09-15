@@ -303,6 +303,9 @@ defmodule Pythonx.Nif do
   def py_dict_keys(_ref), do: :erlang.nif_error(:not_loaded)
   def py_dict_values(_ref), do: :erlang.nif_error(:not_loaded)
   def py_dict_size(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_dict_merge(_ref, _b, _override), do: :erlang.nif_error(:not_loaded)
+  def py_dict_update(_ref, _b), do: :erlang.nif_error(:not_loaded)
+  def py_dict_merge_from_seq2(_ref, _seq2, _override), do: :erlang.nif_error(:not_loaded)
 
   def py_list_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_check_exact(_ref), do: :erlang.nif_error(:not_loaded)

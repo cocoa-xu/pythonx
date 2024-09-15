@@ -160,7 +160,8 @@ defmodule Pythonx.C.PyDict do
   """
   @doc stable_api: true
   @spec set_default(PyObject.t(), PyObject.t(), PyObject.t()) :: PyObject.borrowed()
-  def set_default(p, key, defaultobj) when is_reference(p) and is_reference(key) and is_reference(defaultobj), do: Pythonx.Nif.py_dict_set_default(p, key, defaultobj)
+  def set_default(p, key, defaultobj) when is_reference(p) and is_reference(key) and is_reference(defaultobj),
+    do: Pythonx.Nif.py_dict_set_default(p, key, defaultobj)
 
   @doc """
   Return a PyListObject containing all the items from the dictionary.
@@ -197,4 +198,53 @@ defmodule Pythonx.C.PyDict do
   @doc stable_api: true
   @spec size(PyObject.t()) :: integer()
   def size(p) when is_reference(p), do: Pythonx.Nif.py_dict_size(p)
+
+  @doc """
+  Iterate over mapping object `b` adding key-value pairs to dictionary `a`.
+
+  `b` may be a dictionary, or any object supporting `PyMapping.keys/1` and `PyObject.get_item/2`.
+
+  If `override` is true, existing pairs in `a` will be replaced if a matching key is found in `b`,
+  otherwise pairs will only be added if there is not a matching key in `a`.
+
+  Return `:ok` on success or `PyErr.t()` with an exception.
+  """
+  @doc stable_api: true
+  @spec merge(PyObject.t(), PyObject.t(), boolean()) :: :ok | PyErr.t()
+  def merge(a, b, override) when is_reference(a) and is_reference(b) and is_boolean(override),
+    do: Pythonx.Nif.py_dict_merge(a, b, override)
+
+  @doc """
+  This is the same as `PyDict.merge(a, b, true)`, and is similar to `a.update(b)` in Python except
+  that `PyDict.update/2` doesn’t fall back to the iterating over a sequence of key value pairs if
+  the second argument has no “keys” attribute.
+
+  Return `:ok` on success or `PyErr.t()` with an exception.
+  """
+  @doc stable_api: true
+  @spec update(PyObject.t(), PyObject.t()) :: :ok | PyErr.t()
+  def update(a, b) when is_reference(a) and is_reference(b), do: Pythonx.Nif.py_dict_update(a, b)
+
+  @doc """
+  Update or merge into dictionary `a`, from the key-value pairs in `seq2`.
+
+  `seq2` must be an iterable object producing iterable objects of length 2, viewed as key-value pairs.
+
+  In case of duplicate keys, the last wins if `override` is true, else the first wins.
+
+  Return `:ok` on success or `PyErr.t()` with an exception.
+
+  Equivalent Python (except for the return value):
+
+  ```python
+  def PyDict_MergeFromSeq2(a, seq2, override):
+    for key, value in seq2:
+        if override or key not in a:
+            a[key] = value
+  ```
+  """
+  @doc stable_api: true
+  @spec merge_from_seq2(PyObject.t(), PyObject.t(), boolean()) :: :ok | PyErr.t()
+  def merge_from_seq2(a, seq2, override) when is_reference(a) and is_reference(seq2) and is_boolean(override),
+    do: Pythonx.Nif.py_dict_merge_from_seq2(a, seq2, override)
 end

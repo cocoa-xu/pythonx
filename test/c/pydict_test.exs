@@ -301,4 +301,134 @@ defmodule Pythonx.C.PyDict.Test do
       assert 0 == PyDict.size(obj)
     end
   end
+
+  describe "merge/3" do
+    test "merge(a, b, false)" do
+      a = PyDict.new()
+      b = PyDict.new()
+
+      key = PyUnicode.from_string("key")
+      value_a = PyUnicode.from_string("value_a")
+      value_b = PyUnicode.from_string("value_b")
+
+      assert true == PyDict.set_item(a, key, value_a)
+      assert true == PyDict.set_item(b, key, value_b)
+
+      assert 1 == PyDict.size(a)
+      assert 1 == PyDict.size(b)
+
+      assert :ok == PyDict.merge(a, b, false)
+      assert 1 == PyDict.size(a)
+
+      assert true == PyDict.contains(a, key)
+
+      value = PyDict.get_item(a, key)
+      assert is_reference(value)
+      assert "value_a" == PyUnicode.as_utf8(value)
+    end
+
+    test "merge(a, b, true)" do
+      a = PyDict.new()
+      b = PyDict.new()
+
+      key = PyUnicode.from_string("key")
+      value_a = PyUnicode.from_string("value_a")
+      value_b = PyUnicode.from_string("value_b")
+
+      assert true == PyDict.set_item(a, key, value_a)
+      assert true == PyDict.set_item(b, key, value_b)
+
+      assert 1 == PyDict.size(a)
+      assert 1 == PyDict.size(b)
+
+      assert :ok == PyDict.merge(a, b, true)
+      assert 1 == PyDict.size(a)
+
+      assert true == PyDict.contains(a, key)
+
+      value = PyDict.get_item(a, key)
+      assert is_reference(value)
+      assert "value_b" == PyUnicode.as_utf8(value)
+    end
+  end
+
+  describe "update/2" do
+    test "same as `PyDict.merge(a, b, true)`" do
+      a = PyDict.new()
+      b = PyDict.new()
+
+      key = PyUnicode.from_string("key")
+      value_a = PyUnicode.from_string("value_a")
+      value_b = PyUnicode.from_string("value_b")
+
+      assert true == PyDict.set_item(a, key, value_a)
+      assert true == PyDict.set_item(b, key, value_b)
+
+      assert 1 == PyDict.size(a)
+      assert 1 == PyDict.size(b)
+
+      assert :ok == PyDict.merge(a, b, true)
+      assert 1 == PyDict.size(a)
+
+      assert true == PyDict.contains(a, key)
+
+      value = PyDict.get_item(a, key)
+      assert is_reference(value)
+      assert "value_b" == PyUnicode.as_utf8(value)
+    end
+  end
+
+  describe "merge_from_seq2/2" do
+    test "merge_from_seq2(dict, seq, false)`" do
+      dict = PyDict.new()
+      seq = PyList.new(0)
+
+      key = PyUnicode.from_string("key")
+      value_a = PyUnicode.from_string("value_a")
+      value_b = PyUnicode.from_string("value_b")
+
+      assert true == PyDict.set_item(dict, key, value_a)
+      assert 1 == PyDict.size(dict)
+
+      seq_items = PyList.new(0)
+      assert true == PyList.append(seq_items, key)
+      assert true == PyList.append(seq_items, value_b)
+      assert true == PyList.append(seq, PyList.as_tuple(seq_items))
+
+      assert :ok == PyDict.merge_from_seq2(dict, seq, false)
+      assert 1 == PyDict.size(dict)
+
+      assert true == PyDict.contains(dict, key)
+
+      value = PyDict.get_item(dict, key)
+      assert is_reference(value)
+      assert "value_a" == PyUnicode.as_utf8(value)
+    end
+
+    test "merge_from_seq2(dict, seq, true)`" do
+      dict = PyDict.new()
+      seq = PyList.new(0)
+
+      key = PyUnicode.from_string("key")
+      value_a = PyUnicode.from_string("value_a")
+      value_b = PyUnicode.from_string("value_b")
+
+      assert true == PyDict.set_item(dict, key, value_a)
+      assert 1 == PyDict.size(dict)
+
+      seq_items = PyList.new(0)
+      assert true == PyList.append(seq_items, key)
+      assert true == PyList.append(seq_items, value_b)
+      assert true == PyList.append(seq, PyList.as_tuple(seq_items))
+
+      assert :ok == PyDict.merge_from_seq2(dict, seq, true)
+      assert 1 == PyDict.size(dict)
+
+      assert true == PyDict.contains(dict, key)
+
+      value = PyDict.get_item(dict, key)
+      assert is_reference(value)
+      assert "value_b" == PyUnicode.as_utf8(value)
+    end
+  end
 end
