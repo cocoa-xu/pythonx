@@ -68,6 +68,32 @@ defmodule Pythonx.C.PyDict.Test do
     end
   end
 
+  describe "copy/1" do
+    test "returns a new dictionary that contains the same key-value pairs as p" do
+      obj = PyDict.new()
+
+      key1 = PyUnicode.from_string("key1")
+      value1 = PyUnicode.from_string("value1")
+      true = PyDict.set_item(obj, key1, value1)
+
+      key2 = PyUnicode.from_string("key2")
+      value2 = PyUnicode.from_string("value2")
+      true = PyDict.set_item(obj, key2, value2)
+
+      assert 2 == PyDict.size(obj)
+
+      copy = PyDict.copy(obj)
+      assert is_reference(copy)
+      assert 2 == PyDict.size(copy)
+
+      assert true == PyDict.contains(copy, key1)
+      assert "value1" == PyUnicode.as_utf8(PyDict.get_item(copy, key1))
+
+      assert true == PyDict.contains(copy, key2)
+      assert "value2" == PyUnicode.as_utf8(PyDict.get_item(copy, key2))
+    end
+  end
+
   describe "get_item/2 and set_item/3" do
     test "sets the item at key in dict to value" do
       obj = PyDict.new()
@@ -175,6 +201,31 @@ defmodule Pythonx.C.PyDict.Test do
       assert 0 == PyDict.size(obj)
       assert false == PyDict.contains(obj, key2)
       assert %PyErr{} = PyDict.get_item_with_error(obj, key2)
+    end
+  end
+
+  describe "set_default/3" do
+    test "inserts with value defaultobj and defaultobj is returned" do
+      obj = PyDict.new()
+
+      key1 = PyUnicode.from_string("key1")
+      value1 = PyUnicode.from_string("value1")
+
+      key2 = PyUnicode.from_string("key2")
+      default_value = PyUnicode.from_string("default_value")
+
+      true = PyDict.set_item(obj, key1, value1)
+      assert 1 == PyDict.size(obj)
+
+      assert true == PyDict.contains(obj, key1)
+      assert "value1" == PyUnicode.as_utf8(PyDict.get_item(obj, key1))
+      assert false == PyDict.contains(obj, key2)
+
+      value = PyDict.set_default(obj, key2, default_value)
+      assert true == PyDict.contains(obj, key2)
+      assert 2 == PyDict.size(obj)
+      assert is_reference(value)
+      assert "default_value" == PyUnicode.as_utf8(value)
     end
   end
 

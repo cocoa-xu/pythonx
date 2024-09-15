@@ -49,14 +49,14 @@ defmodule Pythonx.C.PyDict do
   @spec contains(PyObject.t(), PyObject.t()) :: boolean() | PyErr.t()
   def contains(p, key) when is_reference(p) and is_reference(key), do: Pythonx.Nif.py_dict_contains(p, key)
 
-  # @doc """
-  # Return a new dictionary that contains the same key-value pairs as `p`.
+  @doc """
+  Return a new dictionary that contains the same key-value pairs as `p`.
 
-  # Return value: New reference.
-  # """
-  # @doc stable_api: true
-  # @spec copy(PyObject.t()) :: PyObject.t() | PyErr.t()
-  # def copy(p) when is_reference(p), do: Pythonx.Nif.py_dict_copy(p)
+  Return value: New reference.
+  """
+  @doc stable_api: true
+  @spec copy(PyObject.t()) :: PyObject.t() | PyErr.t()
+  def copy(p) when is_reference(p), do: Pythonx.Nif.py_dict_copy(p)
 
   @doc """
   Insert `val` into the dictionary `p` with a key of `key`.
@@ -147,20 +147,20 @@ defmodule Pythonx.C.PyDict do
   @spec get_item_string(PyObject.t(), String.t()) :: PyObject.borrowed() | nil
   def get_item_string(p, key) when is_reference(p) and is_binary(key), do: Pythonx.Nif.py_dict_get_item_string(p, key)
 
-  # @doc """
-  # This is the same as the Python-level `dict.setdefault()`.
+  @doc """
+  This is the same as the Python-level `dict.setdefault()`.
 
-  # If present, it returns the value corresponding to `key` from the dictionary `p`.
+  If present, it returns the value corresponding to `key` from the dictionary `p`.
 
-  # If the key is not in the dict, it is inserted with value `defaultobj` and `defaultobj` is returned.
+  If the key is not in the dict, it is inserted with value `defaultobj` and `defaultobj` is returned.
 
-  # This function evaluates the hash function of key only once, instead of evaluating it independently for the lookup and the insertion.
+  This function evaluates the hash function of key only once, instead of evaluating it independently for the lookup and the insertion.
 
-  # Return value: Borrowed reference.
-  # """
-  # @doc stable_api: true
-  # @spec set_default(PyObject.t(), PyObject.t(), PyObject.t()) :: PyObject.borrowed()
-  # def set_default(p, key, defaultobj) when is_reference(p) and is_reference(key) and is_reference(defaultobj), do: Pythonx.Nif.py_dict_set_default(p, key, defaultobj)
+  Return value: Borrowed reference.
+  """
+  @doc stable_api: true
+  @spec set_default(PyObject.t(), PyObject.t(), PyObject.t()) :: PyObject.borrowed()
+  def set_default(p, key, defaultobj) when is_reference(p) and is_reference(key) and is_reference(defaultobj), do: Pythonx.Nif.py_dict_set_default(p, key, defaultobj)
 
   @doc """
   Return a PyListObject containing all the items from the dictionary.
