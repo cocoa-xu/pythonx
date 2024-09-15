@@ -85,9 +85,27 @@ namespace erlang
                             reinterpret_cast<ErlNifSInt64 *>(var));
     }
 
+    int get(ErlNifEnv *env, ERL_NIF_TERM term, uint64_t *var)
+    {
+      return enif_get_uint64(env, term,
+                             reinterpret_cast<ErlNifUInt64 *>(var));
+    }
+
     int get(ErlNifEnv *env, ERL_NIF_TERM term, double *var)
     {
       return enif_get_double(env, term, var);
+    }
+
+    int get_number(ErlNifEnv *env, ERL_NIF_TERM term, double *var)
+    {
+      if (!enif_get_double(env, term, var)) {
+        ErlNifSInt64 i64;
+        if (!enif_get_int64(env, term, &i64)) {
+          return 0;
+        }
+        *var = (double)i64;
+      }
+      return 1;
     }
 
     // Standard types

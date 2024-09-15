@@ -13,6 +13,7 @@
 #include "pythonx_pyerr.hpp"
 #include "pythonx_pydict.hpp"
 #include "pythonx_pylist.hpp"
+#include "pythonx_pylong.hpp"
 #include "pythonx_pyobject.hpp"
 #include "pythonx_pytuple.hpp"
 #include "pythonx_pyunicode.hpp"
@@ -573,6 +574,29 @@ static ErlNifFunc nif_functions[] = {
     {"py_list_sort", 1, pythonx_py_list_sort, 0},
     {"py_list_reverse", 1, pythonx_py_list_reverse, 0},
     {"py_list_as_tuple", 1, pythonx_py_list_as_tuple, 0},
+
+    {"py_long_check", 1, pythonx_py_long_check, 0},
+    {"py_long_check_exact", 1, pythonx_py_long_check_exact, 0},
+    {"py_long_from_long", 1, pythonx_py_long_from_long, 0},
+    {"py_long_from_unsigned_long", 1, pythonx_py_long_from_unsigned_long, 0},
+    {"py_long_from_ssize_t", 1, pythonx_py_long_from_ssize_t, 0},
+    {"py_long_from_size_t", 1, pythonx_py_long_from_size_t, 0},
+    {"py_long_from_long_long", 1, pythonx_py_long_from_long_long, 0},
+    {"py_long_from_unsigned_long_long", 1, pythonx_py_long_from_unsigned_long_long, 0},
+    {"py_long_from_double", 1, pythonx_py_long_from_double, 0},
+    {"py_long_from_string", 2, pythonx_py_long_from_string, 0},
+    {"py_long_as_long", 1, pythonx_py_long_as_long, 0},
+    {"py_long_as_long_and_overflow", 1, pythonx_py_long_as_long_and_overflow, 0},
+    {"py_long_as_long_long", 1, pythonx_py_long_as_long_long, 0},
+    {"py_long_as_long_long_and_overflow", 1, pythonx_py_long_as_long_long_and_overflow, 0},
+    {"py_long_as_ssize_t", 1, pythonx_py_long_as_ssize_t, 0},
+    {"py_long_as_unsigned_long", 1, pythonx_py_long_as_unsigned_long, 0},
+    {"py_long_as_size_t", 1, pythonx_py_long_as_size_t, 0},
+    {"py_long_as_unsigned_long_long", 1, pythonx_py_long_as_unsigned_long_long, 0},
+    {"py_long_as_unsigned_long_mask", 1, pythonx_py_long_as_unsigned_long_mask, 0},
+    {"py_long_as_unsigned_long_long_mask", 1, pythonx_py_long_as_unsigned_long_long_mask, 0},
+    {"py_long_as_double", 1, pythonx_py_long_as_double, 0},
+    {"py_long_get_info", 0, pythonx_py_long_get_info, 0},
 
     {"py_object_has_attr", 2, pythonx_py_object_has_attr, 0},
     {"py_object_has_attr_string", 2, pythonx_py_object_has_attr_string, 0},
