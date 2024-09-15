@@ -248,3 +248,27 @@ defmodule Pythonx.C.PyDict do
   def merge_from_seq2(a, seq2, override) when is_reference(a) and is_reference(seq2) and is_boolean(override),
     do: Pythonx.Nif.py_dict_merge_from_seq2(a, seq2, override)
 end
+
+defimpl Pythonx.Codec.Encoder, for: Map do
+  alias Pythonx.Beam.PyObject
+  alias Pythonx.C.PyDict
+  alias Pythonx.Codec.Encoder
+
+  @spec encode(Map.t()) :: PyObject.t() | PyErr.t()
+  def encode(value) do
+    value
+    |> encode_c()
+    |> PyObject.from_c_pyobject()
+  end
+
+  @spec encode_c(Map.t()) :: CPyObject.t()
+  def encode_c(value) do
+    dict = PyDict.new()
+
+    for {key, val} <- value do
+      PyDict.set_item(dict, Encoder.encode_c(key), Encoder.encode_c(val))
+    end
+
+    dict
+  end
+end

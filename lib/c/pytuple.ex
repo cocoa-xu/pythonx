@@ -75,3 +75,23 @@ defmodule Pythonx.C.PyTuple do
   # def set_item(p, pos, o) when is_reference(p) and is_integer(pos) and is_reference(o),
   #   do: Pythonx.Nif.py_tuple_set_item(p, pos, o)
 end
+
+defimpl Pythonx.Codec.Encoder, for: Tuple do
+  alias Pythonx.Beam.PyObject
+  alias Pythonx.C.PyList
+  alias Pythonx.Codec.Encoder
+
+  @spec encode(Tuple.t()) :: PyObject.t() | PyErr.t()
+  def encode(value) do
+    value
+    |> encode_c()
+    |> PyObject.from_c_pyobject()
+  end
+
+  @spec encode_c(Tuple.t()) :: CPyObject.t()
+  def encode_c(value) do
+    as_list = Tuple.to_list(value)
+    list = Encoder.encode_c(as_list)
+    PyList.as_tuple(list)
+  end
+end

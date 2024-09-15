@@ -62,12 +62,12 @@ defmodule Pythonx.C.PyObject.Test do
 
     test "print/3" do
       assert ExUnit.CaptureIO.capture_io(fn ->
-        PyObject.print(PyObject.py_none(), :stdout, 0)
-      end) == "None\n"
+               PyObject.print(PyObject.py_none(), :stdout, 0)
+             end) == "None\n"
 
       assert ExUnit.CaptureIO.capture_io(:stderr, fn ->
-        PyObject.print(PyObject.py_true(), :stderr, 0)
-      end) == "True\n"
+               PyObject.print(PyObject.py_true(), :stderr, 0)
+             end) == "True\n"
     end
   end
 

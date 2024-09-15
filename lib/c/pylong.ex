@@ -239,3 +239,25 @@ defmodule Pythonx.C.PyLong do
   @spec get_info() :: PyObject.t() | PyErr.t()
   def get_info, do: Pythonx.Nif.py_long_get_info()
 end
+
+defimpl Pythonx.Codec.Encoder, for: Integer do
+  alias Pythonx.Beam.PyObject
+  alias Pythonx.C.PyLong
+  alias Pythonx.C.PyObject, as: CPyObject
+
+  @spec encode(integer()) :: PyObject.t() | PyErr.t()
+  def encode(value) when is_integer(value) do
+    value
+    |> encode_c()
+    |> PyObject.from_c_pyobject()
+  end
+
+  @spec encode_c(integer()) :: CPyObject.t() | PyErr.t()
+  def encode_c(value) when value >= 0 do
+    PyLong.from_unsigned_long_long(value)
+  end
+
+  def encode_c(value) when value < 0 do
+    PyLong.from_unsigned_long_long(value)
+  end
+end

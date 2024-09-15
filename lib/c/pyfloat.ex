@@ -67,3 +67,20 @@ defmodule Pythonx.C.PyFloat do
   @spec get_min() :: float()
   def get_min, do: Pythonx.Nif.py_float_get_min()
 end
+
+defimpl Pythonx.Codec.Encoder, for: Float do
+  alias Pythonx.Beam.PyObject
+  alias Pythonx.C.PyFloat
+
+  @spec encode(float()) :: PyObject.t() | PyErr.t()
+  def encode(value) do
+    value
+    |> encode_c()
+    |> PyObject.from_c_pyobject()
+  end
+
+  @spec encode_c(float()) :: CPyObject.t()
+  def encode_c(value) do
+    PyFloat.from_double(value)
+  end
+end

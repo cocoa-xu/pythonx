@@ -158,3 +158,25 @@ defmodule Pythonx.C.PyList do
   @spec as_tuple(PyObject.t()) :: PyObject.t() | PyErr.t()
   def as_tuple(list) when is_reference(list), do: Pythonx.Nif.py_list_as_tuple(list)
 end
+
+defimpl Pythonx.Codec.Encoder, for: List do
+  alias Pythonx.Beam.PyObject
+  alias Pythonx.C.PyList
+  alias Pythonx.C.PyObject, as: CPyObject
+  alias Pythonx.Codec.Encoder
+
+  @spec encode(list()) :: PyObject.t() | PyErr.t()
+  def encode(value) when is_list(value) do
+    value
+    |> encode_c()
+    |> PyObject.from_c_pyobject()
+  end
+
+  @spec encode_c(list()) :: CPyObject.t() | PyErr.t()
+  def encode_c(value) when is_list(value) do
+    Enum.reduce(value, PyList.new(0), fn item, list ->
+      PyList.append(list, Encoder.encode_c(item))
+      list
+    end)
+  end
+end
