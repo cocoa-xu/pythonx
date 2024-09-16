@@ -258,6 +258,6 @@ defimpl Pythonx.Codec.Encoder, for: Integer do
   end
 
   def encode_c(value) when value < 0 do
-    PyLong.from_unsigned_long_long(value)
+    PyLong.from_long_long(value)
   end
 end

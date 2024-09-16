@@ -16,16 +16,11 @@ defprotocol Pythonx.Codec.Encoder do
 end
 
 defimpl Pythonx.Codec.Encoder, for: Any do
-  alias Pythonx.Beam.PyObject
-  alias Pythonx.C.PyObject, as: CPyObject
-
-  @spec encode(any()) :: PyObject.t()
   def encode(_) do
-    PyObject.from_c_pyobject(CPyObject.py_none())
+    raise RuntimeError, "Not implemented"
   end
 
-  @spec encode_c(any()) :: CPyObject.t()
   def encode_c(_) do
-    Pythonx.C.PyObject.py_none()
+    raise RuntimeError, "Not implemented"
   end
 end

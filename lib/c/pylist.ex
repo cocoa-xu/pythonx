@@ -161,6 +161,7 @@ end
 
 defimpl Pythonx.Codec.Encoder, for: List do
   alias Pythonx.Beam.PyObject
+  alias Pythonx.C.PyDict
   alias Pythonx.C.PyList
   alias Pythonx.C.PyObject, as: CPyObject
   alias Pythonx.Codec.Encoder
@@ -174,9 +175,19 @@ defimpl Pythonx.Codec.Encoder, for: List do
 
   @spec encode_c(list()) :: CPyObject.t() | PyErr.t()
   def encode_c(value) when is_list(value) do
-    Enum.reduce(value, PyList.new(0), fn item, list ->
-      PyList.append(list, Encoder.encode_c(item))
-      list
-    end)
+    if Keyword.keyword?(value) do
+      dict = PyDict.new()
+
+      Enum.each(value, fn {key, val} ->
+        PyDict.set_item(dict, Encoder.encode_c(key), Encoder.encode_c(val))
+      end)
+
+      dict
+    else
+      Enum.reduce(value, PyList.new(0), fn item, list ->
+        PyList.append(list, Encoder.encode_c(item))
+        list
+      end)
+    end
   end
 end

@@ -5,7 +5,7 @@ defmodule Pythonx.Beam.PyObject do
 
   alias Pythonx.C.PyObject, as: CPyObject
 
-  @type t :: %__MODULE__{ref: reference()}
+  @type t :: %__MODULE__{ref: CPyObject.t()}
 
   defstruct [
     :ref
@@ -47,6 +47,10 @@ defmodule Pythonx.Beam.PyObject do
     end
   end
 
+  def decode(%__MODULE__{} = val) do
+    Pythonx.Codec.Decoder.decode(val)
+  end
+
   def from_c_pyobject(ref) when is_reference(ref) do
     %__MODULE__{ref: ref}
   end
@@ -61,11 +65,14 @@ defmodule Pythonx.Beam.PyObject do
     alias Pythonx.Beam.PyObject
 
     def inspect(%PyObject{ref: ref} = obj, opts) do
+      type = PyObject.type(obj)
+      flags = if type == "str", do: Pythonx.C.py_print_raw(), else: 0
+
       inner = [
-        Inspect.List.keyword({:type, PyObject.type(obj)}, opts),
+        Inspect.List.keyword({:type, type}, opts),
         color(",", :map, opts),
         line(),
-        Inspect.List.keyword({:repr, CPyObject.print(ref, 0)}, opts)
+        Inspect.List.keyword({:repr, CPyObject.print(ref, flags)}, opts)
       ]
 
       concat([
@@ -80,6 +87,42 @@ defmodule Pythonx.Beam.PyObject do
         line(),
         ">"
       ])
+    end
+  end
+end
+
+defimpl Pythonx.Codec.Decoder, for: Pythonx.Beam.PyObject do
+  alias Pythonx.Beam.PyDict
+  alias Pythonx.Beam.PyLong
+  alias Pythonx.Beam.PyList
+  alias Pythonx.Beam.PyObject
+  alias Pythonx.Beam.PyUnicode
+  alias Pythonx.C.PyObject, as: CPyObject
+
+  def decode(obj) do
+    type = PyObject.type(obj)
+
+    case type do
+      "NoneType" ->
+        nil
+
+      "bool" ->
+        CPyObject.is_true(obj.ref)
+
+      "str" ->
+        Pythonx.Codec.Decoder.decode(%PyUnicode{ref: obj.ref})
+
+      "int" ->
+        Pythonx.Codec.Decoder.decode(%PyLong{ref: obj.ref})
+
+      "dict" ->
+        Pythonx.Codec.Decoder.decode(%PyDict{ref: obj.ref})
+
+      "list" ->
+        Pythonx.Codec.Decoder.decode(%PyList{ref: obj.ref})
+
+      _ ->
+        raise RuntimeError, "Not implemented yet for type #{type}"
     end
   end
 end

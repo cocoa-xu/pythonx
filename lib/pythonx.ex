@@ -8,6 +8,11 @@ defmodule Pythonx do
   """
   def list_python_versions, do: Pythonx.Nif.list_python_versions()
 
+  defdelegate py_print_raw, to: Pythonx.C
+  defdelegate py_eval_input, to: Pythonx.C
+  defdelegate py_file_input, to: Pythonx.C
+  defdelegate py_single_input, to: Pythonx.C
+
   @doc """
   Evaluates the given python code and returns the variables specified in the `return` option.
   """
