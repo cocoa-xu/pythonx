@@ -81,21 +81,28 @@ defmodule MyModule do
   import Pythonx
 
   def do_stuff_in_python do
-    pyeval(
-      """
-      import math
-      x = 5
-      y = 6
-      z = (x, y)
-      x = math.pow(x, 2)
-      """,
-      return: [:x, :y, :z] # <- list of variables to return to Elixir
+    a = 1
+    b = 2
+    pyinline("c = a + b",
+      return: [:c]
     )
-    
-    # these variables will be automatically defined in the current scope
-    # {25, 6, {5, 6}} == {x, y, z}
+    dbg(c)
   end
 end
+```
+
+Or in IEx
+
+```elixir
+iex> Pythonx.initialize_once()
+iex> import Pythonx
+iex> a = 1
+1
+iex> b = 2
+2
+iex> pyinline("c = a + b", return: [:c])
+iex> c
+3
 ```
 
 #### Executes a command with the embedded python3 executable
