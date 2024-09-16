@@ -39,6 +39,41 @@ iex> PyLong.as_long(val_c)
 3
 ```
 
+### BEAM Level
+```elixir
+iex> Pythonx.initialize_once()
+iex> globals = Pythonx.Beam.encode(%{})
+#PyObject<
+  type: "dict",
+  repr: "{}"
+>
+iex> locals = Pythonx.Beam.encode([a: 1, b: 2])
+#PyObject<
+  type: "dict",
+  repr: "{'a': 1, 'b': 2}"
+>
+iex> Pythonx.Beam.PyRun.string("c = a + b", Pythonx.Beam.py_file_input(), globals, locals)
+#PyObject<
+  type: "NoneType",
+  repr: "None"
+>
+iex> locals
+#PyObject<
+  type: "dict",
+  repr: "{'a': 1, 'b': 2, 'c': 3}"
+>
+```
+
+### High-Level
+```elixir
+iex> Pythonx.initialize_once()
+iex> state = Pythonx.State.new(locals: [a: 1, b: 2])
+%Pythonx.State{globals: %{}, locals: [a: 1, b: 2]}
+iex> {result, state} = Pythonx.PyRun.string("c = a + b", Pythonx.py_file_input(), state)
+iex> state.locals
+%{"a" => 1, "b" => 2, "c" => 3}
+```
+
 ### Very High Level
 #### Python Code Evaluation
 ```elixir
