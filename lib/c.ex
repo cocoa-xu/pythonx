@@ -1,5 +1,7 @@
 defmodule Pythonx.C do
-  @moduledoc false
+  @moduledoc """
+  Python C API.
+  """
 
   @doc """
   Flag to be used with multiple functions that print the object (like `PyObject.print/1` and `PyFile.write_object`).
@@ -31,4 +33,8 @@ defmodule Pythonx.C do
   """
   @spec py_single_input :: integer()
   def py_single_input, do: Pythonx.Nif.py_single_input()
+
+  defdelegate py_none(), to: Pythonx.C.PyObject
+  defdelegate py_true(), to: Pythonx.C.PyObject
+  defdelegate py_false(), to: Pythonx.C.PyObject
 end
