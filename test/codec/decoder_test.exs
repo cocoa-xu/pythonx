@@ -2,16 +2,16 @@ defmodule Pythonx.Codec.Decoder.Test do
   use ExUnit.Case, async: false
 
   alias Pythonx.Beam.PyFloat
-  alias Pythonx.Beam.PyLong
   alias Pythonx.Beam.PyList
-  alias Pythonx.Beam.PyUnicode
+  alias Pythonx.Beam.PyLong
   alias Pythonx.Beam.PyObject
   alias Pythonx.Beam.PyTuple
+  alias Pythonx.Beam.PyUnicode
   alias Pythonx.C.PyFloat, as: CPyFloat
-  alias Pythonx.C.PyLong, as: CPyLong
   alias Pythonx.C.PyList, as: CPyList
-  alias Pythonx.C.PyUnicode, as: CPyUnicode
+  alias Pythonx.C.PyLong, as: CPyLong
   alias Pythonx.C.PyObject, as: CPyObject
+  alias Pythonx.C.PyUnicode, as: CPyUnicode
 
   setup do
     Pythonx.initialize_once()

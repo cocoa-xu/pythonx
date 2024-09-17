@@ -93,8 +93,8 @@ end
 
 defimpl Pythonx.Codec.Decoder, for: Pythonx.Beam.PyObject do
   alias Pythonx.Beam.PyDict
-  alias Pythonx.Beam.PyLong
   alias Pythonx.Beam.PyList
+  alias Pythonx.Beam.PyLong
   alias Pythonx.Beam.PyObject
   alias Pythonx.Beam.PyUnicode
   alias Pythonx.C.PyObject, as: CPyObject

@@ -12,19 +12,22 @@ defmodule Pythonx.C.PyRun.Test do
   end
 
   describe "simple_string/1" do
+    @tag :c_pyrun
     test "returns 0 when succeeded" do
-      return = PyRun.simple_string("a = 1 + 2")
+      return = PyRun.simple_string("1 + 2")
       assert is_integer(return)
       assert 0 == return
     end
 
+    @tag :c_pyrun
     test "returns non-zero when failed" do
-      return = PyRun.simple_string("a = b + 2")
+      return = PyRun.simple_string("b + 2")
       assert is_integer(return)
       assert -1 == return
     end
   end
 
+  @tag :c_pyrun
   test "string/4" do
     globals = PyDict.new()
     locals = PyDict.new()

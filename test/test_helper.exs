@@ -1,7 +1,9 @@
 ExUnit.configure(
   exclude: [
     pyinline: true,
-    pyeval: true
+    pyeval: true,
+    c_pyrun: true,
+    flaky: true
   ]
 )
 

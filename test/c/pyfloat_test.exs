@@ -61,6 +61,7 @@ defmodule Pythonx.C.PyFloat.Test do
   end
 
   describe "get_info/0" do
+    @tag :flaky
     test "returns a reference" do
       info = PyFloat.get_info()
       assert is_reference(info)

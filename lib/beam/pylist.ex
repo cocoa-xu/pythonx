@@ -20,7 +20,8 @@ defimpl Pythonx.Codec.Decoder, for: Pythonx.Beam.PyList do
   def decode(%PyList{ref: ref}) do
     size = CPyList.size(ref)
 
-    Enum.reduce(0..(size - 1), [], fn pos, acc ->
+    0..(size - 1)
+    |> Enum.reduce([], fn pos, acc ->
       item = CPyList.get_item(ref, pos)
       [PyObject.decode(%PyObject{ref: item}) | acc]
     end)
