@@ -14,8 +14,10 @@
 #include "pythonx_pydict.hpp"
 #include "pythonx_pyeval.hpp"
 #include "pythonx_pyfloat.hpp"
+#include "pythonx_pyindex.hpp"
 #include "pythonx_pylist.hpp"
 #include "pythonx_pylong.hpp"
+#include "pythonx_pynumber.hpp"
 #include "pythonx_pyobject.hpp"
 #include "pythonx_pyrun.hpp"
 #include "pythonx_pytuple.hpp"
@@ -595,6 +597,8 @@ static ErlNifFunc nif_functions[] = {
     {"py_float_get_max", 0, pythonx_py_float_get_max, 0},
     {"py_float_get_min", 0, pythonx_py_float_get_min, 0},
 
+    {"py_index_check", 1, pythonx_py_index_check, 0},
+
     {"py_list_check", 1, pythonx_py_list_check, 0},
     {"py_list_check_exact", 1, pythonx_py_list_check_exact, 0},
     {"py_list_new", 1, pythonx_py_list_new, 0},
@@ -631,6 +635,44 @@ static ErlNifFunc nif_functions[] = {
     {"py_long_as_unsigned_long_long_mask", 1, pythonx_py_long_as_unsigned_long_long_mask, 0},
     {"py_long_as_double", 1, pythonx_py_long_as_double, 0},
     {"py_long_get_info", 0, pythonx_py_long_get_info, 0},
+
+    {"py_number_check", 1, pythonx_py_number_check, 0},
+    {"py_number_add", 2, pythonx_py_number_add, 0},
+    {"py_number_subtract", 2, pythonx_py_number_subtract, 0},
+    {"py_number_multiply", 2, pythonx_py_number_multiply, 0},
+    {"py_number_matrix_multiply", 2, pythonx_py_number_matrix_multiply, 0},
+    {"py_number_floor_divide", 2, pythonx_py_number_floor_divide, 0},
+    {"py_number_true_divide", 2, pythonx_py_number_true_divide, 0},
+    {"py_number_remainder", 2, pythonx_py_number_remainder, 0},
+    {"py_number_divmod", 2, pythonx_py_number_divmod, 0},
+    {"py_number_power", 3, pythonx_py_number_power, 0},
+    {"py_number_negative", 1, pythonx_py_number_negative, 0},
+    {"py_number_positive", 1, pythonx_py_number_positive, 0},
+    {"py_number_absolute", 1, pythonx_py_number_absolute, 0},
+    {"py_number_invert", 1, pythonx_py_number_invert, 0},
+    {"py_number_lshift", 2, pythonx_py_number_lshift, 0},
+    {"py_number_rshift", 2, pythonx_py_number_rshift, 0},
+    {"py_number_and", 2, pythonx_py_number_and, 0},
+    {"py_number_xor", 2, pythonx_py_number_xor, 0},
+    {"py_number_or", 2, pythonx_py_number_or, 0},
+    {"py_number_in_place_add", 2, pythonx_py_number_in_place_add, 0},
+    {"py_number_in_place_subtract", 2, pythonx_py_number_in_place_subtract, 0},
+    {"py_number_in_place_multiply", 2, pythonx_py_number_in_place_multiply, 0},
+    {"py_number_in_place_matrix_multiply", 2, pythonx_py_number_in_place_matrix_multiply, 0},
+    {"py_number_in_place_floor_divide", 2, pythonx_py_number_in_place_floor_divide, 0},
+    {"py_number_in_place_true_divide", 2, pythonx_py_number_in_place_true_divide, 0},
+    {"py_number_in_place_remainder", 2, pythonx_py_number_in_place_remainder, 0},
+    {"py_number_in_place_power", 3, pythonx_py_number_in_place_power, 0},
+    {"py_number_in_place_lshift", 2, pythonx_py_number_in_place_lshift, 0},
+    {"py_number_in_place_rshift", 2, pythonx_py_number_in_place_rshift, 0},
+    {"py_number_in_place_and", 2, pythonx_py_number_in_place_and, 0},
+    {"py_number_in_place_xor", 2, pythonx_py_number_in_place_xor, 0},
+    {"py_number_in_place_or", 2, pythonx_py_number_in_place_or, 0},
+    {"py_number_long", 1, pythonx_py_number_long, 0},
+    {"py_number_float", 1, pythonx_py_number_float, 0},
+    {"py_number_index", 1, pythonx_py_number_index, 0},
+    {"py_number_to_base", 2, pythonx_py_number_to_base, 0},
+    {"py_number_as_ssize_t", 2, pythonx_py_number_as_ssize_t, 0},
 
     {"py_object_print", 2, pythonx_py_object_print, 0},
     {"py_object_has_attr", 2, pythonx_py_object_has_attr, 0},
