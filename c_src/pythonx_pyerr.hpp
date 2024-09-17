@@ -9,6 +9,11 @@
 #include "nif_utils.hpp"
 #include "pythonx_utils.hpp"
 
+static ERL_NIF_TERM pythonx_py_err_clear(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    PyErr_Clear();
+    return kAtomOk;
+}
+
 static ERL_NIF_TERM pythonx_current_pyerr(ErlNifEnv *env);
 
 static inline ERL_NIF_TERM nonnull_pyobject_to_nifres(ErlNifEnv *env, PyObject *result, bool borrowed = false) {

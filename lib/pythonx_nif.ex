@@ -307,6 +307,8 @@ defmodule Pythonx.Nif do
   def py_dict_update(_ref, _b), do: :erlang.nif_error(:not_loaded)
   def py_dict_merge_from_seq2(_ref, _seq2, _override), do: :erlang.nif_error(:not_loaded)
 
+  def py_err_clear, do: :erlang.nif_error(:not_loaded)
+
   def py_eval_get_builtins, do: :erlang.nif_error(:not_loaded)
   def py_eval_get_locals, do: :erlang.nif_error(:not_loaded)
   def py_eval_get_globals, do: :erlang.nif_error(:not_loaded)

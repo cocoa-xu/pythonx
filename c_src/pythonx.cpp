@@ -582,6 +582,8 @@ static ErlNifFunc nif_functions[] = {
     {"py_dict_update", 2, pythonx_py_dict_update, 0},
     {"py_dict_merge_from_seq2", 3, pythonx_py_dict_merge_from_seq2, 0},
 
+    {"py_err_clear", 0, pythonx_py_err_clear, 0},
+
     {"py_eval_get_builtins", 0, pythonx_py_eval_get_builtins, 0},
     {"py_eval_get_locals", 0, pythonx_py_eval_get_locals, 0},
     {"py_eval_get_globals", 0, pythonx_py_eval_get_globals, 0},
