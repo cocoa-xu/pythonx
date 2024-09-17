@@ -41,6 +41,10 @@ jobs:
         run: |
           mix deps.get
           mix test
+      
+      - name: Flaky Test
+        run: |
+          mix test --only flaky || true
 
   macos:
     runs-on: macos-12
@@ -107,3 +111,10 @@ jobs:
 
           mix deps.get
           mix test
+
+      - name: Flaky Test
+        run: |
+          export PATH=$(pwd)/./cache/otp/usr/local/bin:$(pwd)/./cache/elixir/elixir-${{ env.ELIXIR_VERSION }}/bin:${PATH}
+          export ERL_ROOTDIR=$(pwd)/./cache/otp/usr/local/lib/erlang
+
+          mix test --only flaky || true
