@@ -41,6 +41,7 @@ jobs:
         run: |
           mix deps.get
           mix test
+          mix test --only c_pyrun
       
       - name: Flaky Test
         run: |
@@ -111,6 +112,7 @@ jobs:
 
           mix deps.get
           mix test
+          mix test --only c_pyrun
 
       - name: Flaky Test
         run: |
