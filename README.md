@@ -130,9 +130,9 @@ iex> pyeval(
 ...>   """
 ...>   from yt_dlp import YoutubeDL
 ...>   import json
-...>   with YoutubeDL(params={'quite': True}) as ytb_dl:
-...>   info = ytb_dl.extract_info('https://www.youtube.com/watch?v=#{video_id}', download=False)
-...>   info = json.dumps(info, indent=2)
+...>   with YoutubeDL(params={'quiet': True}) as ytb_dl:
+...>     info = ytb_dl.extract_info('https://www.youtube.com/watch?v=#{video_id}', download=False)
+...>     info = json.dumps(info, indent=2)
 ...>   """,
 ...>   return: [:info]
 ...> )
