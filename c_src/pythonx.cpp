@@ -493,21 +493,19 @@ static ERL_NIF_TERM pythonx_py_false(ErlNifEnv *env, int argc, const ERL_NIF_TER
 }
 
 static ERL_NIF_TERM pythonx_py_incref(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     Py_XINCREF(res->val);
-    return ref;
+    return argv[0];
 }
 
 static ERL_NIF_TERM pythonx_py_decref(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     Py_XDECREF(res->val);
-    return ref;
+    return argv[0];
 }
 
 static ERL_NIF_TERM pythonx_py_print_raw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {

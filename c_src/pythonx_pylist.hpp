@@ -39,8 +39,7 @@ static ERL_NIF_TERM pythonx_py_list_new(ErlNifEnv *env, int argc, const ERL_NIF_
 }
 
 static ERL_NIF_TERM pythonx_py_list_size(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     Py_ssize_t size = PyList_Size(res->val);
@@ -49,8 +48,7 @@ static ERL_NIF_TERM pythonx_py_list_size(ErlNifEnv *env, int argc, const ERL_NIF
 }
 
 static ERL_NIF_TERM pythonx_py_list_get_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int64_t index;
@@ -61,8 +59,7 @@ static ERL_NIF_TERM pythonx_py_list_get_item(ErlNifEnv *env, int argc, const ERL
 }
 
 static ERL_NIF_TERM pythonx_py_list_set_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int64_t index;
@@ -79,8 +76,7 @@ static ERL_NIF_TERM pythonx_py_list_set_item(ErlNifEnv *env, int argc, const ERL
 }
 
 static ERL_NIF_TERM pythonx_py_list_insert(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int64_t index;
@@ -97,8 +93,7 @@ static ERL_NIF_TERM pythonx_py_list_insert(ErlNifEnv *env, int argc, const ERL_N
 }
 
 static ERL_NIF_TERM pythonx_py_list_append(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObjectNifRes *item_res = get_resource<PyObjectNifRes>(env, argv[1]);
@@ -110,8 +105,7 @@ static ERL_NIF_TERM pythonx_py_list_append(ErlNifEnv *env, int argc, const ERL_N
 }
 
 static ERL_NIF_TERM pythonx_py_list_get_slice(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int64_t low, high;
@@ -123,8 +117,7 @@ static ERL_NIF_TERM pythonx_py_list_get_slice(ErlNifEnv *env, int argc, const ER
 }
 
 static ERL_NIF_TERM pythonx_py_list_set_slice(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int64_t low, high;
@@ -147,8 +140,7 @@ static ERL_NIF_TERM pythonx_py_list_set_slice(ErlNifEnv *env, int argc, const ER
 }
 
 static ERL_NIF_TERM pythonx_py_list_sort(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int result = PyList_Sort(res->val);
@@ -157,8 +149,7 @@ static ERL_NIF_TERM pythonx_py_list_sort(ErlNifEnv *env, int argc, const ERL_NIF
 }
 
 static ERL_NIF_TERM pythonx_py_list_reverse(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int result = PyList_Reverse(res->val);
@@ -167,8 +158,7 @@ static ERL_NIF_TERM pythonx_py_list_reverse(ErlNifEnv *env, int argc, const ERL_
 }
 
 static ERL_NIF_TERM pythonx_py_list_as_tuple(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyList_AsTuple(res->val);

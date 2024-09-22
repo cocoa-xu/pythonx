@@ -116,8 +116,7 @@ static ERL_NIF_TERM pythonx_py_long_from_string(ErlNifEnv *env, int argc, const 
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_long(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     long result = PyLong_AsLong(res->val);
@@ -126,12 +125,10 @@ static ERL_NIF_TERM pythonx_py_long_as_long(ErlNifEnv *env, int argc, const ERL_
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_long_and_overflow(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int overflow = 0;
-
     long result = PyLong_AsLongAndOverflow(res->val, &overflow);
     if (overflow != 0) {
         return enif_make_tuple2(env, enif_make_long(env, result), enif_make_int(env, overflow));
@@ -142,8 +139,7 @@ static ERL_NIF_TERM pythonx_py_long_as_long_and_overflow(ErlNifEnv *env, int arg
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_long_long(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     long long result = PyLong_AsLongLong(res->val);
@@ -152,8 +148,7 @@ static ERL_NIF_TERM pythonx_py_long_as_long_long(ErlNifEnv *env, int argc, const
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_long_long_and_overflow(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     int overflow = 0;
@@ -168,8 +163,7 @@ static ERL_NIF_TERM pythonx_py_long_as_long_long_and_overflow(ErlNifEnv *env, in
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_ssize_t(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     Py_ssize_t result = PyLong_AsSsize_t(res->val);
@@ -178,8 +172,7 @@ static ERL_NIF_TERM pythonx_py_long_as_ssize_t(ErlNifEnv *env, int argc, const E
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_unsigned_long(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     unsigned long result = PyLong_AsUnsignedLong(res->val);
@@ -188,8 +181,7 @@ static ERL_NIF_TERM pythonx_py_long_as_unsigned_long(ErlNifEnv *env, int argc, c
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_size_t(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     size_t result = PyLong_AsSize_t(res->val);
@@ -198,8 +190,7 @@ static ERL_NIF_TERM pythonx_py_long_as_size_t(ErlNifEnv *env, int argc, const ER
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_unsigned_long_long(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     unsigned long long result = PyLong_AsUnsignedLongLong(res->val);
@@ -208,8 +199,7 @@ static ERL_NIF_TERM pythonx_py_long_as_unsigned_long_long(ErlNifEnv *env, int ar
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_unsigned_long_mask(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     unsigned long result = PyLong_AsUnsignedLongMask(res->val);
@@ -218,8 +208,7 @@ static ERL_NIF_TERM pythonx_py_long_as_unsigned_long_mask(ErlNifEnv *env, int ar
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_unsigned_long_long_mask(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     unsigned long long result = PyLong_AsUnsignedLongLongMask(res->val);
@@ -228,8 +217,7 @@ static ERL_NIF_TERM pythonx_py_long_as_unsigned_long_long_mask(ErlNifEnv *env, i
 }
 
 static ERL_NIF_TERM pythonx_py_long_as_double(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     double result = PyLong_AsUnsignedLongLongMask(res->val);

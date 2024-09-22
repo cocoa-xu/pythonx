@@ -29,8 +29,7 @@ static ERL_NIF_TERM pythonx_py_float_check_exact(ErlNifEnv *env, int argc, const
 }
 
 static ERL_NIF_TERM pythonx_py_float_from_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
 
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
     PyObject *result = PyFloat_FromString(res->val);
@@ -46,8 +45,7 @@ static ERL_NIF_TERM pythonx_py_float_from_double(ErlNifEnv *env, int argc, const
 }
 
 static ERL_NIF_TERM pythonx_py_float_as_double(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
 
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 

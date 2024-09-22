@@ -63,8 +63,7 @@ static ERL_NIF_TERM pythonx_py_dict_copy(ErlNifEnv *env, int argc, const ERL_NIF
 }
 
 static ERL_NIF_TERM pythonx_py_dict_set_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
@@ -79,8 +78,7 @@ static ERL_NIF_TERM pythonx_py_dict_set_item(ErlNifEnv *env, int argc, const ERL
 }
 
 static ERL_NIF_TERM pythonx_py_dict_set_item_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     std::string key;
@@ -95,8 +93,7 @@ static ERL_NIF_TERM pythonx_py_dict_set_item_string(ErlNifEnv *env, int argc, co
 }
 
 static ERL_NIF_TERM pythonx_py_dict_del_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
@@ -108,8 +105,7 @@ static ERL_NIF_TERM pythonx_py_dict_del_item(ErlNifEnv *env, int argc, const ERL
 }
 
 static ERL_NIF_TERM pythonx_py_dict_del_item_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     std::string key;
@@ -121,8 +117,7 @@ static ERL_NIF_TERM pythonx_py_dict_del_item_string(ErlNifEnv *env, int argc, co
 }
 
 static ERL_NIF_TERM pythonx_py_dict_get_item(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
@@ -133,8 +128,7 @@ static ERL_NIF_TERM pythonx_py_dict_get_item(ErlNifEnv *env, int argc, const ERL
 }
 
 static ERL_NIF_TERM pythonx_py_dict_get_item_with_error(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
@@ -145,8 +139,7 @@ static ERL_NIF_TERM pythonx_py_dict_get_item_with_error(ErlNifEnv *env, int argc
 }
 
 static ERL_NIF_TERM pythonx_py_dict_get_item_string(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     std::string key;
@@ -157,8 +150,7 @@ static ERL_NIF_TERM pythonx_py_dict_get_item_string(ErlNifEnv *env, int argc, co
 }
 
 static ERL_NIF_TERM pythonx_py_dict_set_default(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObjectNifRes *key_res = get_resource<PyObjectNifRes>(env, argv[1]);
@@ -172,8 +164,7 @@ static ERL_NIF_TERM pythonx_py_dict_set_default(ErlNifEnv *env, int argc, const 
 }
 
 static ERL_NIF_TERM pythonx_py_dict_items(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyDict_Items(res->val);
@@ -181,8 +172,7 @@ static ERL_NIF_TERM pythonx_py_dict_items(ErlNifEnv *env, int argc, const ERL_NI
 }
 
 static ERL_NIF_TERM pythonx_py_dict_keys(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyDict_Keys(res->val);
@@ -190,8 +180,7 @@ static ERL_NIF_TERM pythonx_py_dict_keys(ErlNifEnv *env, int argc, const ERL_NIF
 }
 
 static ERL_NIF_TERM pythonx_py_dict_values(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     PyObject *result = PyDict_Values(res->val);
@@ -199,8 +188,7 @@ static ERL_NIF_TERM pythonx_py_dict_values(ErlNifEnv *env, int argc, const ERL_N
 }
 
 static ERL_NIF_TERM pythonx_py_dict_size(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref = argv[0];
-    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, ref);
+    PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res == nullptr)) return enif_make_badarg(env);
 
     Py_ssize_t size = PyDict_Size(res->val);
@@ -209,12 +197,10 @@ static ERL_NIF_TERM pythonx_py_dict_size(ErlNifEnv *env, int argc, const ERL_NIF
 }
 
 static ERL_NIF_TERM pythonx_py_dict_merge(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref1 = argv[0];
-    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, ref1);
+    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res1 == nullptr)) return enif_make_badarg(env);
 
-    ERL_NIF_TERM ref2 = argv[1];
-    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, ref2);
+    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, argv[1]);
     if (unlikely(res2 == nullptr)) return enif_make_badarg(env);
 
     int override = enif_is_identical(argv[2], kAtomTrue) ? 1 : 0;
@@ -225,12 +211,10 @@ static ERL_NIF_TERM pythonx_py_dict_merge(ErlNifEnv *env, int argc, const ERL_NI
 }
 
 static ERL_NIF_TERM pythonx_py_dict_update(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref1 = argv[0];
-    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, ref1);
+    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res1 == nullptr)) return enif_make_badarg(env);
 
-    ERL_NIF_TERM ref2 = argv[1];
-    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, ref2);
+    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, argv[1]);
     if (unlikely(res2 == nullptr)) return enif_make_badarg(env);
 
     int result = PyDict_Update(res1->val, res2->val);
@@ -239,12 +223,10 @@ static ERL_NIF_TERM pythonx_py_dict_update(ErlNifEnv *env, int argc, const ERL_N
 }
 
 static ERL_NIF_TERM pythonx_py_dict_merge_from_seq2(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ERL_NIF_TERM ref1 = argv[0];
-    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, ref1);
+    PyObjectNifRes *res1 = get_resource<PyObjectNifRes>(env, argv[0]);
     if (unlikely(res1 == nullptr)) return enif_make_badarg(env);
 
-    ERL_NIF_TERM ref2 = argv[1];
-    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, ref2);
+    PyObjectNifRes *res2 = get_resource<PyObjectNifRes>(env, argv[1]);
     if (unlikely(res2 == nullptr)) return enif_make_badarg(env);
 
     int override = enif_is_identical(argv[2], kAtomTrue) ? 1 : 0;
