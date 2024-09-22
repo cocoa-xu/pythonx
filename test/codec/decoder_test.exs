@@ -5,12 +5,14 @@ defmodule Pythonx.Codec.Decoder.Test do
   alias Pythonx.Beam.PyList
   alias Pythonx.Beam.PyLong
   alias Pythonx.Beam.PyObject
+  alias Pythonx.Beam.PySet
   alias Pythonx.Beam.PyTuple
   alias Pythonx.Beam.PyUnicode
   alias Pythonx.C.PyFloat, as: CPyFloat
   alias Pythonx.C.PyList, as: CPyList
   alias Pythonx.C.PyLong, as: CPyLong
   alias Pythonx.C.PyObject, as: CPyObject
+  alias Pythonx.C.PySet, as: CPySet
   alias Pythonx.C.PyUnicode, as: CPyUnicode
 
   setup do
@@ -138,6 +140,17 @@ defmodule Pythonx.Codec.Decoder.Test do
 
       decoded = Pythonx.Codec.Decoder.decode(obj)
       assert "str" == decoded
+    end
+
+    test "decodes a PySet object to a MapSet" do
+      ref = CPySet.new(nil)
+      CPySet.add(ref, CPyLong.from_long(42))
+      CPySet.add(ref, CPyLong.from_long(42))
+      CPySet.add(ref, CPyLong.from_long(43))
+      obj = %PySet{ref: ref}
+
+      decoded = Pythonx.Codec.Decoder.decode(obj)
+      assert MapSet.equal?(MapSet.new([42, 42, 43]), decoded)
     end
   end
 end

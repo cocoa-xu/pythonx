@@ -421,6 +421,15 @@ defmodule Pythonx.Nif do
   def py_object_str(_ref), do: :erlang.nif_error(:not_loaded)
   def py_object_bytes(_ref), do: :erlang.nif_error(:not_loaded)
 
+  def py_set_check(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_set_new(_iterable), do: :erlang.nif_error(:not_loaded)
+  def py_set_size(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_set_contains(_ref, _key), do: :erlang.nif_error(:not_loaded)
+  def py_set_add(_ref, _key), do: :erlang.nif_error(:not_loaded)
+  def py_set_discard(_ref, _key), do: :erlang.nif_error(:not_loaded)
+  def py_set_pop(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_set_clear(_ref), do: :erlang.nif_error(:not_loaded)
+
   def py_tuple_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_tuple_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
   def py_tuple_new(_len), do: :erlang.nif_error(:not_loaded)

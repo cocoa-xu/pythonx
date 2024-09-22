@@ -20,6 +20,7 @@
 #include "pythonx_pynumber.hpp"
 #include "pythonx_pyobject.hpp"
 #include "pythonx_pyrun.hpp"
+#include "pythonx_pyset.hpp"
 #include "pythonx_pytuple.hpp"
 #include "pythonx_pyunicode.hpp"
 
@@ -693,6 +694,15 @@ static ErlNifFunc nif_functions[] = {
     {"py_object_ascii", 1, pythonx_py_object_ascii, 0},
     {"py_object_str", 1, pythonx_py_object_str, 0},
     {"py_object_bytes", 1, pythonx_py_object_bytes, 0},
+
+    {"py_set_check", 1, pythonx_py_set_check, 0},
+    {"py_set_new", 1, pythonx_py_set_new, 0},
+    {"py_set_size", 1, pythonx_py_set_size, 0},
+    {"py_set_contains", 2, pythonx_py_set_contains, 0},
+    {"py_set_add", 2, pythonx_py_set_add, 0},
+    {"py_set_discard", 2, pythonx_py_set_discard, 0},
+    {"py_set_pop", 1, pythonx_py_set_pop, 0},
+    {"py_set_clear", 1, pythonx_py_set_clear, 0},
 
     {"py_tuple_check", 1, pythonx_py_tuple_check, 0},
     {"py_tuple_check_exact", 1, pythonx_py_tuple_check_exact, 0},
