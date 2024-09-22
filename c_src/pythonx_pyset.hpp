@@ -34,7 +34,6 @@ static ERL_NIF_TERM pythonx_py_set_new(ErlNifEnv *env, int argc, const ERL_NIF_T
     return pyobject_to_nifres_or_pyerr(env, result);
 }
 
-
 static ERL_NIF_TERM pythonx_py_set_size(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (res == nullptr) return enif_make_badarg(env);

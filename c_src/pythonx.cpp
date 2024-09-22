@@ -10,10 +10,12 @@
 #include "nif_utils.hpp"
 #include "pythonx_consts.hpp"
 #include "pyobject_nif_res.hpp"
+#include "pythonx_pyanyset.hpp"
 #include "pythonx_pyerr.hpp"
 #include "pythonx_pydict.hpp"
 #include "pythonx_pyeval.hpp"
 #include "pythonx_pyfloat.hpp"
+#include "pythonx_pyfrozenset.hpp"
 #include "pythonx_pyindex.hpp"
 #include "pythonx_pylist.hpp"
 #include "pythonx_pylong.hpp"
@@ -559,6 +561,9 @@ static ErlNifFunc nif_functions[] = {
     {"py_incref", 1, pythonx_py_incref, 0},
     {"py_decref", 1, pythonx_py_decref, 0},
 
+    {"py_anyset_check", 1, pythonx_py_anyset_check, 0},
+    {"py_anyset_check_exact", 1, pythonx_py_anyset_check_exact, 0},
+
     {"py_dict_check", 1, pythonx_py_dict_check, 0},
     {"py_dict_check_exact", 1, pythonx_py_dict_check_exact, 0},
     {"py_dict_new", 0, pythonx_py_dict_new, 0},
@@ -597,6 +602,10 @@ static ErlNifFunc nif_functions[] = {
     {"py_float_get_info", 0, pythonx_py_float_get_info, 0},
     {"py_float_get_max", 0, pythonx_py_float_get_max, 0},
     {"py_float_get_min", 0, pythonx_py_float_get_min, 0},
+
+    {"py_frozenset_check", 1, pythonx_py_frozenset_check, 0},
+    {"py_frozenset_check_exact", 1, pythonx_py_frozenset_check_exact, 0},
+    {"py_frozenset_new", 1, pythonx_py_frozenset_new, 0},
 
     {"py_index_check", 1, pythonx_py_index_check, 0},
 

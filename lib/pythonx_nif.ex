@@ -285,6 +285,9 @@ defmodule Pythonx.Nif do
   def py_incref(_ref), do: :erlang.nif_error(:not_loaded)
   def py_decref(_ref), do: :erlang.nif_error(:not_loaded)
 
+  def py_anyset_check(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_anyset_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
+
   def py_dict_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_dict_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
   def py_dict_new, do: :erlang.nif_error(:not_loaded)
@@ -323,6 +326,10 @@ defmodule Pythonx.Nif do
   def py_float_get_info, do: :erlang.nif_error(:not_loaded)
   def py_float_get_max, do: :erlang.nif_error(:not_loaded)
   def py_float_get_min, do: :erlang.nif_error(:not_loaded)
+
+  def py_frozenset_check(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_frozenset_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
+  def py_frozenset_new(_iterable), do: :erlang.nif_error(:not_loaded)
 
   def py_list_check(_ref), do: :erlang.nif_error(:not_loaded)
   def py_list_check_exact(_ref), do: :erlang.nif_error(:not_loaded)
