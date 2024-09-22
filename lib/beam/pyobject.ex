@@ -93,9 +93,11 @@ end
 
 defimpl Pythonx.Codec.Decoder, for: Pythonx.Beam.PyObject do
   alias Pythonx.Beam.PyDict
+  alias Pythonx.Beam.PyFloat
   alias Pythonx.Beam.PyList
   alias Pythonx.Beam.PyLong
   alias Pythonx.Beam.PyObject
+  alias Pythonx.Beam.PyTuple
   alias Pythonx.Beam.PyUnicode
   alias Pythonx.C.PyObject, as: CPyObject
 
@@ -115,11 +117,17 @@ defimpl Pythonx.Codec.Decoder, for: Pythonx.Beam.PyObject do
       "int" ->
         Pythonx.Codec.Decoder.decode(%PyLong{ref: obj.ref})
 
+      "float" ->
+        Pythonx.Codec.Decoder.decode(%PyFloat{ref: obj.ref})
+
       "dict" ->
         Pythonx.Codec.Decoder.decode(%PyDict{ref: obj.ref})
 
       "list" ->
         Pythonx.Codec.Decoder.decode(%PyList{ref: obj.ref})
+
+      "tuple" ->
+        Pythonx.Codec.Decoder.decode(%PyTuple{ref: obj.ref})
 
       _ ->
         raise RuntimeError, "Not implemented yet for type #{type}"

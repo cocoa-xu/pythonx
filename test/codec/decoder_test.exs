@@ -26,7 +26,15 @@ defmodule Pythonx.Codec.Decoder.Test do
       assert_in_delta 42.42, decoded, 0.0001
     end
 
-    test "decodes a PyList object to an Integer" do
+    test "decodes a PyObject(PyFloat) object to a Float" do
+      ref = CPyFloat.from_double(42.42)
+
+      obj = %PyObject{ref: ref}
+      decoded = Pythonx.Codec.Decoder.decode(obj)
+      assert_in_delta 42.42, decoded, 0.0001
+    end
+
+    test "decodes a PyList object to a list" do
       ref = CPyList.new(0)
       CPyList.append(ref, CPyLong.from_long(42))
       CPyList.append(ref, CPyLong.from_long(43))
@@ -36,9 +44,27 @@ defmodule Pythonx.Codec.Decoder.Test do
       assert [42, 43] == decoded
     end
 
+    test "decodes a PyObject(PyList) object to a list" do
+      ref = CPyList.new(0)
+      CPyList.append(ref, CPyLong.from_long(42))
+      CPyList.append(ref, CPyLong.from_long(43))
+      obj = %PyObject{ref: ref}
+
+      decoded = Pythonx.Codec.Decoder.decode(obj)
+      assert [42, 43] == decoded
+    end
+
     test "decodes a PyLong object to an Integer" do
       ref = CPyLong.from_long(42)
       obj = %PyLong{ref: ref}
+
+      decoded = Pythonx.Codec.Decoder.decode(obj)
+      assert 42 == decoded
+    end
+
+    test "decodes a PyObject(PyLong) object to an Integer" do
+      ref = CPyLong.from_long(42)
+      obj = %PyObject{ref: ref}
 
       decoded = Pythonx.Codec.Decoder.decode(obj)
       assert 42 == decoded
@@ -68,16 +94,6 @@ defmodule Pythonx.Codec.Decoder.Test do
       assert false == decoded
     end
 
-    test "decodes a PyObject object to appropriate types" do
-      ref = CPyList.new(0)
-      CPyList.append(ref, CPyLong.from_long(42))
-      CPyList.append(ref, CPyLong.from_long(43))
-      obj = %PyObject{ref: ref}
-
-      decoded = Pythonx.Codec.Decoder.decode(obj)
-      assert [42, 43] == decoded
-    end
-
     test "decodes a PyTuple object to a Tuple" do
       list = CPyList.new(0)
       a = CPyUnicode.from_string("a")
@@ -93,9 +109,32 @@ defmodule Pythonx.Codec.Decoder.Test do
       assert {"a", "b", "c"} == decoded
     end
 
+    test "decodes a PyObject(PyTuple) object to a Tuple" do
+      list = CPyList.new(0)
+      a = CPyUnicode.from_string("a")
+      b = CPyUnicode.from_string("b")
+      c = CPyUnicode.from_string("c")
+      CPyList.append(list, a)
+      CPyList.append(list, b)
+      CPyList.append(list, c)
+      ref = CPyList.as_tuple(list)
+      obj = %PyObject{ref: ref}
+
+      decoded = Pythonx.Codec.Decoder.decode(obj)
+      assert {"a", "b", "c"} == decoded
+    end
+
     test "decodes a PyUnicode object to a String.t()" do
       ref = CPyUnicode.from_string("str")
       obj = %PyUnicode{ref: ref}
+
+      decoded = Pythonx.Codec.Decoder.decode(obj)
+      assert "str" == decoded
+    end
+
+    test "decodes a PyObject(PyUnicode) object to a String.t()" do
+      ref = CPyUnicode.from_string("str")
+      obj = %PyObject{ref: ref}
 
       decoded = Pythonx.Codec.Decoder.decode(obj)
       assert "str" == decoded
