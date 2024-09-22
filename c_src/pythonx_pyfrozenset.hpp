@@ -39,6 +39,7 @@ static ERL_NIF_TERM pythonx_py_frozenset_new(ErlNifEnv *env, int argc, const ERL
         iterable = res->val;
     }
 
+    PyErr_Clear();
     PyObject * result = PyFrozenSet_New(iterable);
     return pyobject_to_nifres_or_pyerr(env, result);
 }

@@ -30,6 +30,7 @@ static ERL_NIF_TERM pythonx_py_set_new(ErlNifEnv *env, int argc, const ERL_NIF_T
         iterable = res->val;
     }
 
+    PyErr_Clear();
     PyObject * result = PySet_New(iterable);
     return pyobject_to_nifres_or_pyerr(env, result);
 }
@@ -38,8 +39,9 @@ static ERL_NIF_TERM pythonx_py_set_size(ErlNifEnv *env, int argc, const ERL_NIF_
     PyObjectNifRes *res = get_resource<PyObjectNifRes>(env, argv[0]);
     if (res == nullptr) return enif_make_badarg(env);
 
+    PyErr_Clear();
     Py_ssize_t size = PySet_Size(res->val);
-    if (size == -1) return pythonx_current_pyerr(env);
+    // if (PyErr_Occurred()) return pythonx_current_pyerr(env);
     return enif_make_int64(env, size);
 }
 

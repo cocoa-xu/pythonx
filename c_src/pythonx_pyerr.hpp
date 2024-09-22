@@ -98,6 +98,7 @@ cleanup:
     if (type_res != nullptr) enif_release_resource(type_res);
     if (value_res != nullptr) enif_release_resource(value_res);
     if (traceback_res != nullptr) enif_release_resource(traceback_res);
+    PyErr_Clear();
 
     return ret;
 }

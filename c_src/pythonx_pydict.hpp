@@ -231,6 +231,7 @@ static ERL_NIF_TERM pythonx_py_dict_merge_from_seq2(ErlNifEnv *env, int argc, co
 
     int override = enif_is_identical(argv[2], kAtomTrue) ? 1 : 0;
 
+    PyErr_Clear();
     int result = PyDict_MergeFromSeq2(res1->val, res2->val, override);
     if (result == -1) return pythonx_current_pyerr(env);
     return kAtomOk;
