@@ -183,10 +183,19 @@ defmodule Pythonx do
     Pythonx.Nif.initialize(python_home())
   end
 
-  def initialize_once(python_home \\ python_home()) do
+  def initialize_once(python_home) do
+    unless Pythonx.Nif.nif_loaded() do
+      Pythonx.Nif.load_nif({:custom, python_home})
+      Pythonx.Nif.initialize(python_home)
+    end
+
+    :ok
+  end
+
+  def initialize_once do
     unless Pythonx.Nif.nif_loaded() do
       Pythonx.Nif.load_nif(:embedded)
-      Pythonx.Nif.initialize(python_home)
+      Pythonx.Nif.initialize(python_home())
     end
 
     :ok
