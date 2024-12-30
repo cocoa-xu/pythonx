@@ -61,7 +61,7 @@ jobs:
     strategy:
       matrix:
         job:
-          - { otp_version: "25.3", runs-on: macos-12, arch: "x86_64" }
+          - { otp_version: "25.3", runs-on: macos-13, arch: "x86_64" }
           - { otp_version: "25.3", runs-on: macos-14, arch: "aarch64" }
 
     name: ${{ matrix.job.arch }}-apple-drawin - OTP ${{ matrix.job.otp_version }}

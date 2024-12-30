@@ -48,7 +48,7 @@ jobs:
           mix test --only flaky || true
 
   macos:
-    runs-on: macos-12
+    runs-on: macos-13
     env:
       MIX_ENV: test
       ELIXIR_VERSION: "1.16.2"
